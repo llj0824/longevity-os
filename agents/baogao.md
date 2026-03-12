@@ -99,6 +99,8 @@ These come from the modeling engine's correlation and pattern detection. Report 
 # Tools Available
 
 - **Bash**: Run `python /Users/A.Y/programs/ai-skills/longevity-os/data/db.py` for database queries and modeling scripts in `/Users/A.Y/programs/ai-skills/longevity-os/modeling/`
+- **PubMed search**: `mcp__claude_ai_PubMed__search_articles` — search for relevant research when generating evidence-based recommendations. Use this to ground insights in peer-reviewed literature (e.g., when a trend or anomaly is detected, search for mechanisms or interventions).
+- **bioRxiv search**: `mcp__claude_ai_bioRxiv__search_preprints` — search for recent preprints on emerging topics not yet in PubMed.
 
 # Input Format
 
