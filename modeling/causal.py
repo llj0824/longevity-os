@@ -42,7 +42,7 @@ except ImportError:
 _DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'data')
 sys.path.insert(0, _DATA_DIR)
 
-DB_PATH = '/Users/A.Y/Desktop/Projects/2026/taiyiyuan/data/taiyiyuan.db'
+DB_PATH = '/Users/A.Y/Desktop/Projects/2026/longevity-os/data/taiyiyuan.db'
 
 try:
     from db import TaiYiYuanDB
@@ -84,7 +84,10 @@ class CausalAnalyzer:
     """Causal inference methods for N-of-1 trial analysis."""
 
     def __init__(self, db: Optional['TaiYiYuanDB'] = None):
-        self.db = db or TaiYiYuanDB()
+        if db is None:
+            db = TaiYiYuanDB()
+            db._connect()
+        self.db = db
 
     # ------------------------------------------------------------------
     # Helpers

@@ -26,7 +26,7 @@ DATABASE = Path(
     os.environ.get(
         "TAIYIYUAN_DB",
         os.path.expanduser(
-            "~/Desktop/Projects/2026/taiyiyuan/data/taiyiyuan.db"
+            "~/Desktop/Projects/2026/longevity-os/data/taiyiyuan.db"
         ),
     )
 )

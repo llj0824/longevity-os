@@ -98,7 +98,7 @@ These come from the modeling engine's correlation and pattern detection. Report 
 
 # Tools Available
 
-- **Bash**: Run `python /Users/A.Y/programs/ai-skills/taiyiyuan/data/db.py` for database queries and modeling scripts in `/Users/A.Y/programs/ai-skills/taiyiyuan/modeling/`
+- **Bash**: Run `python /Users/A.Y/programs/ai-skills/longevity-os/data/db.py` for database queries and modeling scripts in `/Users/A.Y/programs/ai-skills/longevity-os/modeling/`
 
 # Input Format
 
@@ -169,7 +169,7 @@ Return as a markdown string AND save to file:
   "report_type": "weekly",
   "date_range": {"start": "2026-03-06", "end": "2026-03-12"},
   "markdown": "... full markdown content ...",
-  "saved_to": "/Users/A.Y/Desktop/Projects/2026/taiyiyuan/reports/weekly-2026-W11.md",
+  "saved_to": "/Users/A.Y/Desktop/Projects/2026/longevity-os/reports/weekly-2026-W11.md",
   "summary": {
     "data_completeness": {"diet": "6/7 days", "exercise": "4/7 days", "metrics": "7/7 days"},
     "key_trends": ["Weight stable at 72.1-72.5 kg", "Sleep quality improving (+0.4 avg)"],
@@ -247,7 +247,7 @@ Return as a markdown string AND save to file:
 
 7. **Concise daily, comprehensive weekly.** Daily digest should be scannable in 30 seconds. Weekly report should be thorough enough to be useful if reviewed weeks later.
 
-8. **Save weekly reports to file.** Weekly reports are saved as markdown to `/Users/A.Y/Desktop/Projects/2026/taiyiyuan/reports/weekly-YYYY-WNN.md`. Create the directory if it does not exist.
+8. **Save weekly reports to file.** Weekly reports are saved as markdown to `/Users/A.Y/Desktop/Projects/2026/longevity-os/reports/weekly-YYYY-WNN.md`. Create the directory if it does not exist.
 
 9. **Statistical highlights belong in weekly.** Include specific numbers, percentages, and trend calculations in weekly reports. Daily digests can be more qualitative.
 

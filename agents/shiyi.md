@@ -103,7 +103,7 @@ nutrition_cache (
 
 # Tools Available
 
-- **Bash**: Run `python /Users/A.Y/programs/ai-skills/taiyiyuan/data/db.py` for database operations and `python /Users/A.Y/programs/ai-skills/taiyiyuan/data/nutrition_api.py` for USDA lookups
+- **Bash**: Run `python /Users/A.Y/programs/ai-skills/longevity-os/data/db.py` for database operations and `python /Users/A.Y/programs/ai-skills/longevity-os/data/nutrition_api.py` for USDA lookups
 - **Read**: Read recipe library entries, nutrition cache, or other reference files
 
 # Input Format

@@ -12,12 +12,12 @@ All data stays local. No cloud. SQLite database, Python server, static HTML dash
 
 ```bash
 # 1. Initialize the database
-cd ~/Desktop/Projects/2026/taiyiyuan
-sqlite3 data/taiyiyuan.db < ~/programs/ai-skills/taiyiyuan/data/schema.sql
+cd ~/Desktop/Projects/2026/longevity-os
+sqlite3 data/taiyiyuan.db < ~/programs/ai-skills/longevity-os/data/schema.sql
 sqlite3 data/taiyiyuan.db "INSERT INTO schema_version VALUES (1, datetime('now'));"
 
 # 2. Start the dashboard server
-python ~/programs/ai-skills/taiyiyuan/dashboard/server.py
+python ~/programs/ai-skills/longevity-os/dashboard/server.py
 
 # 3. Open http://localhost:8420
 ```
@@ -63,7 +63,7 @@ Reports (报告科), Trial Design (院判), and Safety Review (医正) are orche
 ## File Structure
 
 ```
-~/programs/ai-skills/taiyiyuan/       # Skill definition (prompts, agents, scripts)
+~/programs/ai-skills/longevity-os/       # Skill definition (prompts, agents, scripts)
 ├── SKILL.md                          # Main skill prompt (御医 orchestrator)
 ├── agents/                           # Department agent prompts
 │   ├── shiyi.md                      # 食医科 (Diet)
@@ -83,7 +83,7 @@ Reports (报告科), Trial Design (院判), and Safety Review (医正) are orche
 ├── modeling/                         # Statistical analysis scripts
 └── scripts/                          # Utility scripts
 
-~/Desktop/Projects/2026/taiyiyuan/    # Project data (gitignored)
+~/Desktop/Projects/2026/longevity-os/    # Project data (gitignored)
 ├── data/
 │   └── taiyiyuan.db                  # SQLite database (all health data)
 ├── reports/                          # Generated weekly/monthly reports

@@ -74,7 +74,7 @@ Active supplements: `WHERE end_date IS NULL`
 
 # Tools Available
 
-- **Bash**: Run `python /Users/A.Y/programs/ai-skills/taiyiyuan/data/db.py` for database operations
+- **Bash**: Run `python /Users/A.Y/programs/ai-skills/longevity-os/data/db.py` for database operations
 
 # Input Format
 

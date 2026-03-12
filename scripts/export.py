@@ -23,8 +23,8 @@ from pathlib import Path
 # Constants
 # ---------------------------------------------------------------------------
 
-DB_PATH = "/Users/A.Y/Desktop/Projects/2026/taiyiyuan/data/taiyiyuan.db"
-PROJECT_ROOT = Path("/Users/A.Y/Desktop/Projects/2026/taiyiyuan")
+DB_PATH = "/Users/A.Y/Desktop/Projects/2026/longevity-os/data/taiyiyuan.db"
+PROJECT_ROOT = Path("/Users/A.Y/Desktop/Projects/2026/longevity-os")
 
 # Tables and their timestamp columns for date filtering
 TABLE_DATE_COLUMNS: dict[str, str | None] = {

@@ -15,7 +15,7 @@ from typing import Any, Optional
 
 
 # Default database location
-DEFAULT_DB_PATH = "/Users/A.Y/Desktop/Projects/2026/taiyiyuan/data/taiyiyuan.db"
+DEFAULT_DB_PATH = "/Users/A.Y/Desktop/Projects/2026/longevity-os/data/taiyiyuan.db"
 
 # Schema file lives alongside this module
 SCHEMA_PATH = Path(__file__).parent / "schema.sql"
@@ -99,6 +99,20 @@ class TaiYiYuanDB:
     def _now() -> str:
         """Return current UTC time as ISO 8601 with timezone offset."""
         return datetime.now(timezone.utc).isoformat()
+
+    @staticmethod
+    def _normalize_date_range(start_date: str, end_date: str) -> tuple[str, str]:
+        """Normalize date-only strings to full timestamp bounds.
+
+        If start_date looks like a bare date (YYYY-MM-DD), append T00:00:00.
+        If end_date looks like a bare date, append T23:59:59.999999 so that
+        all timestamps on that day are included.
+        """
+        if start_date and len(start_date) == 10:
+            start_date = start_date + "T00:00:00"
+        if end_date and len(end_date) == 10:
+            end_date = end_date + "T23:59:59.999999"
+        return start_date, end_date
 
     def _execute(self, sql: str, params: tuple = ()) -> sqlite3.Cursor:
         """Execute a parameterized query with error handling."""
@@ -214,6 +228,7 @@ class TaiYiYuanDB:
         Returns:
             List of diet entry dicts, each with an 'ingredients' key.
         """
+        start_date, end_date = self._normalize_date_range(start_date, end_date)
         rows = self._execute(
             "SELECT * FROM diet_entries WHERE timestamp >= ? AND timestamp <= ? ORDER BY timestamp",
             (start_date, end_date),
@@ -354,6 +369,7 @@ class TaiYiYuanDB:
 
     def get_exercises(self, start_date: str, end_date: str) -> list[dict]:
         """Get exercise entries with details in a date range."""
+        start_date, end_date = self._normalize_date_range(start_date, end_date)
         rows = self._execute(
             "SELECT * FROM exercise_entries WHERE timestamp >= ? AND timestamp <= ? ORDER BY timestamp",
             (start_date, end_date),
@@ -415,6 +431,7 @@ class TaiYiYuanDB:
         end_date: str,
     ) -> list[dict]:
         """Get body metrics of a specific type in a date range."""
+        start_date, end_date = self._normalize_date_range(start_date, end_date)
         rows = self._execute(
             """SELECT * FROM body_metrics
                WHERE metric_type = ? AND timestamp >= ? AND timestamp <= ?
@@ -549,6 +566,10 @@ class TaiYiYuanDB:
         Returns:
             List of biomarker dicts.
         """
+        if start_date or end_date:
+            start_date, end_date = self._normalize_date_range(
+                start_date or "", end_date or ""
+            )
         conditions = []
         params = []
 
