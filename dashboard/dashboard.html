@@ -156,6 +156,15 @@ body {
   gap: 20px;
 }
 
+.header-logo {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 2px solid var(--gold-dim);
+  box-shadow: 0 0 12px rgba(255,215,0,0.2);
+  object-fit: cover;
+}
+
 .header-title {
   display: flex;
   flex-direction: column;
@@ -1138,6 +1147,7 @@ body {
 <!-- Header -->
 <header class="header">
   <div class="header-left">
+    <img src="/docs/logo.png" alt="太医院" class="header-logo" />
     <div class="header-title">
       <div class="header-cn">太医院</div>
       <div class="header-subtitle">Longevity OS</div>

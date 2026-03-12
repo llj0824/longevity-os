@@ -1,10 +1,17 @@
-# Longevity OS 太医院
+<p align="center">
+  <img src="docs/logo.png" alt="Longevity OS 太医院" width="280" />
+</p>
 
-**Personal longevity optimization system — 个人长寿优化系统**
+<h1 align="center">Longevity OS 太医院</h1>
+<p align="center"><b>Agentic Longevity OS — 个人长寿优化系统</b></p>
 
+<p align="center">
 A scientifically rigorous health tracking and N-of-1 self-experimentation platform, modeled after the historical Imperial Medical Academy (太医院). Built as a Claude Code multi-agent skill system with 10 specialized AI agents, a statistical modeling engine, and an imperial Chinese–themed dashboard.
+</p>
 
+<p align="center">
 All data stays local. No cloud. SQLite database, Python server, static HTML dashboard.
+</p>
 
 <p align="center">
   <img src="docs/screenshots/dashboard-hero.png" alt="Longevity OS Dashboard — Header and Summary" width="100%" />
