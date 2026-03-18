@@ -28,6 +28,9 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Personal notes
+notes/
+
 # Environment / secrets
 .env
 *.key
