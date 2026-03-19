@@ -69,6 +69,7 @@ RDA_REFERENCE = {
 }
 
 DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+LOCAL_DATE_SQL = "SUBSTR(timestamp, 1, 10)"
 
 
 def _to_date(s: str) -> date:
@@ -124,10 +125,10 @@ class ModelingEngine:
             }
             db_col = col_map.get(col, col)
             sql = f"""
-                SELECT DATE(timestamp) AS dt, SUM({db_col}) AS value
+                SELECT {LOCAL_DATE_SQL} AS dt, SUM({db_col}) AS value
                 FROM diet_entries
-                WHERE DATE(timestamp) >= ?
-                GROUP BY DATE(timestamp)
+                WHERE {LOCAL_DATE_SQL} >= ?
+                GROUP BY {LOCAL_DATE_SQL}
                 ORDER BY dt
             """
         elif metric_name.startswith('exercise.'):
@@ -137,18 +138,18 @@ class ModelingEngine:
             db_col = col_map.get(col, col)
             agg = 'SUM' if col in ('minutes', 'distance') else 'AVG'
             sql = f"""
-                SELECT DATE(timestamp) AS dt, {agg}({db_col}) AS value
+                SELECT {LOCAL_DATE_SQL} AS dt, {agg}({db_col}) AS value
                 FROM exercise_entries
-                WHERE DATE(timestamp) >= ?
-                GROUP BY DATE(timestamp)
+                WHERE {LOCAL_DATE_SQL} >= ?
+                GROUP BY {LOCAL_DATE_SQL}
                 ORDER BY dt
             """
         elif metric_name.startswith('biomarker.'):
             marker = metric_name.split('.', 1)[1]
             sql = """
-                SELECT DATE(timestamp) AS dt, value
+                SELECT SUBSTR(timestamp, 1, 10) AS dt, value
                 FROM biomarkers
-                WHERE marker_name = ? AND DATE(timestamp) >= ?
+                WHERE marker_name = ? AND SUBSTR(timestamp, 1, 10) >= ?
                 ORDER BY dt
             """
             df = self._query_df(sql, (marker, cutoff))
@@ -159,10 +160,10 @@ class ModelingEngine:
         else:
             # Default: body_metrics table
             sql = """
-                SELECT DATE(timestamp) AS dt, AVG(value) AS value
+                SELECT SUBSTR(timestamp, 1, 10) AS dt, AVG(value) AS value
                 FROM body_metrics
-                WHERE metric_type = ? AND DATE(timestamp) >= ?
-                GROUP BY DATE(timestamp)
+                WHERE metric_type = ? AND SUBSTR(timestamp, 1, 10) >= ?
+                GROUP BY SUBSTR(timestamp, 1, 10)
                 ORDER BY dt
             """
             df = self._query_df(sql, (metric_name, cutoff))
@@ -411,10 +412,10 @@ class ModelingEngine:
 
         # Daily totals from diet_entries
         entries_df = self._query_df(
-            """SELECT DATE(timestamp) AS dt, meal_type,
+            """SELECT SUBSTR(timestamp, 1, 10) AS dt, meal_type,
                       total_calories, total_protein_g, total_carbs_g,
                       total_fat_g, total_fiber_g
-               FROM diet_entries WHERE DATE(timestamp) >= ? ORDER BY dt""",
+               FROM diet_entries WHERE SUBSTR(timestamp, 1, 10) >= ? ORDER BY dt""",
             (cutoff,),
         )
 
@@ -437,11 +438,11 @@ class ModelingEngine:
         micro_cols = list(RDA_REFERENCE.keys())
         placeholders = ', '.join([f'SUM({c}) AS {c}' for c in micro_cols])
         micro_sql = f"""
-            SELECT DATE(de.timestamp) AS dt, {placeholders}
+            SELECT SUBSTR(de.timestamp, 1, 10) AS dt, {placeholders}
             FROM diet_ingredients di
             JOIN diet_entries de ON di.entry_id = de.id
-            WHERE DATE(de.timestamp) >= ?
-            GROUP BY DATE(de.timestamp)
+            WHERE SUBSTR(de.timestamp, 1, 10) >= ?
+            GROUP BY SUBSTR(de.timestamp, 1, 10)
         """
         micro_df = self._query_df(micro_sql, (cutoff,))
 
@@ -471,9 +472,9 @@ class ModelingEngine:
         cutoff = (datetime.utcnow() - timedelta(days=days)).date().isoformat()
 
         entries_df = self._query_df(
-            """SELECT id, DATE(timestamp) AS dt, activity_type,
+            """SELECT id, SUBSTR(timestamp, 1, 10) AS dt, activity_type,
                       duration_minutes, distance_km, avg_hr, rpe
-               FROM exercise_entries WHERE DATE(timestamp) >= ? ORDER BY dt""",
+               FROM exercise_entries WHERE SUBSTR(timestamp, 1, 10) >= ? ORDER BY dt""",
             (cutoff,),
         )
 
@@ -502,7 +503,7 @@ class ModelingEngine:
                       ee.activity_type
                FROM exercise_details ed
                JOIN exercise_entries ee ON ed.entry_id = ee.id
-               WHERE DATE(ee.timestamp) >= ?""",
+               WHERE SUBSTR(ee.timestamp, 1, 10) >= ?""",
             (cutoff,),
         )
         if not detail_df.empty:
@@ -545,7 +546,7 @@ class ModelingEngine:
         diet_df = self._query_df(
             """SELECT meal_type, total_calories, total_protein_g, total_carbs_g,
                       total_fat_g, total_fiber_g
-               FROM diet_entries WHERE DATE(timestamp) = ?""",
+               FROM diet_entries WHERE SUBSTR(timestamp, 1, 10) = ?""",
             (target,),
         )
         diet_info = None
@@ -565,7 +566,7 @@ class ModelingEngine:
         # --- Exercise ---
         ex_df = self._query_df(
             """SELECT activity_type, duration_minutes, distance_km, rpe
-               FROM exercise_entries WHERE DATE(timestamp) = ?""",
+               FROM exercise_entries WHERE SUBSTR(timestamp, 1, 10) = ?""",
             (target,),
         )
         exercise_info = None
@@ -580,7 +581,7 @@ class ModelingEngine:
         # --- Body metrics ---
         metrics_df = self._query_df(
             """SELECT metric_type, value, unit, context
-               FROM body_metrics WHERE DATE(timestamp) = ?""",
+               FROM body_metrics WHERE SUBSTR(timestamp, 1, 10) = ?""",
             (target,),
         )
         metrics_info = None
@@ -639,7 +640,7 @@ class ModelingEngine:
 
         # --- Insights generated today ---
         insights_df = self._query_df(
-            "SELECT description, insight_type, confidence_level FROM insights WHERE DATE(timestamp) = ?",
+            "SELECT description, insight_type, confidence_level FROM insights WHERE SUBSTR(timestamp, 1, 10) = ?",
             (target,),
         )
         insights_list = []
@@ -675,7 +676,7 @@ class ModelingEngine:
         # Metrics trends for the period
         metric_types_df = self._query_df(
             """SELECT DISTINCT metric_type FROM body_metrics
-               WHERE DATE(timestamp) BETWEEN ? AND ?""",
+               WHERE SUBSTR(timestamp, 1, 10) BETWEEN ? AND ?""",
             (start_date, end_date),
         )
         metric_trends = {}
@@ -687,7 +688,7 @@ class ModelingEngine:
         bio_df = self._query_df(
             """SELECT marker_name, value, unit, reference_low, reference_high,
                       optimal_low, optimal_high
-               FROM biomarkers WHERE DATE(timestamp) BETWEEN ? AND ?""",
+               FROM biomarkers WHERE SUBSTR(timestamp, 1, 10) BETWEEN ? AND ?""",
             (start_date, end_date),
         )
         biomarkers = []
