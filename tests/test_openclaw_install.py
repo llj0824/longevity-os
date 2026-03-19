@@ -9,9 +9,18 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 INSTALL_SCRIPT = REPO_ROOT / "scripts" / "install_openclaw_skill.py"
+SKILL_SOURCE = REPO_ROOT / "SKILL.md"
 
 
 class OpenClawInstallTests(unittest.TestCase):
+    def test_repo_skill_has_valid_frontmatter_header(self) -> None:
+        source_text = SKILL_SOURCE.read_text(encoding="utf-8")
+        self.assertTrue(
+            source_text.startswith("---\n"),
+            "Repo SKILL.md must begin with YAML frontmatter",
+        )
+        self.assertIn("name: longevity\n", source_text)
+
     def test_install_and_check_render_openclaw_skill(self) -> None:
         with tempfile.TemporaryDirectory() as workspace_dir, tempfile.TemporaryDirectory() as project_dir:
             workspace_root = Path(workspace_dir)
@@ -43,6 +52,8 @@ class OpenClawInstallTests(unittest.TestCase):
             self.assertTrue((agents_dir / "shiyi.md").exists())
 
             skill_text = skill_file.read_text(encoding="utf-8")
+            self.assertTrue(skill_text.startswith("---\n"))
+            self.assertIn("name: longevity\n", skill_text)
             self.assertIn(str(REPO_ROOT / "scripts"), skill_text)
             self.assertIn(str(project_root / "data" / "taiyiyuan.db"), skill_text)
             self.assertNotIn("{SCRIPTS_DIR}", skill_text)
