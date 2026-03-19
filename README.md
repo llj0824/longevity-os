@@ -552,18 +552,21 @@ The primary interface is natural language through Claude Code:
 After copying skills to your OpenClaw workspace (see [OpenClaw setup](#setup-on-openclaw) above), interact via any connected platform (WhatsApp, Telegram, Slack, Discord, or iMessage):
 
 ```
-@longevity Had salmon and rice for lunch
-@longevity Weekly report
-@longevity How's my sleep trending?
+/longevity Had salmon and rice for lunch
+/longevity Weekly report
+/longevity How's my sleep trending?
 ```
+
+On the current Telegram setup, typed `/longevity ...` commands are more trustworthy than the visible bot menu. If the menu looks stale after reinstalling the skill, run `openclaw daemon restart`, confirm `openclaw skills list | rg 'longevity|taiyiyuan'`, and test with a typed command.
 
 ---
 
 ## Architecture Docs
 
-The repo now includes a current-state architecture note for keyholders:
+The repo now includes two review-oriented docs for keyholders:
 
-- [`docs/architecture-current-state.html`](docs/architecture-current-state.html) is the primary deep-dive review artifact. It explains what exists today, where the current gaps are, what this branch addressed, how to test it, and what remains.
+- [`docs/architecture-current-state.html`](docs/architecture-current-state.html) explains the repo structure, subsystem boundaries, and the durable write and read surfaces.
+- [`docs/openclaw-rehearsal-proof.md`](docs/openclaw-rehearsal-proof.md) captures the live Telegram before-and-after proof, including the daemon-restart requirement for current rehearsal runs.
 
 If you are evaluating this as a Compound Life AI product rather than a code sample, start there after this README.
 
