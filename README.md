@@ -617,28 +617,6 @@ graph LR
 | `insights` | `insight_type`, `p_value`, `effect_size` | `insight_type IN (correlation, trend, anomaly, pattern)`, confidence_level IN (low, medium, high) | type, actionable, timestamp |
 | `nutrition_cache` | `normalized_ingredient`, `expires_at` | `source IN (usda, openfoodfacts, estimate)`, UNIQUE on normalized_ingredient | ingredient, expires_at |
 
-### Key Design Decisions and Invariants
-
-**1. Modules share no foreign keys.** Diet, exercise, metrics, biomarkers, supplements, and trials are independent tables. Cross-module relationships are discovered at runtime by the Pattern Detector, not enforced in the schema. This means any module can be used standalone, and new modules can be added without touching existing tables.
-
-**2. Adversarial trial review is mandatory.** The Court Magistrate (trial designer) and Medical Censor (safety reviewer) search the literature independently. The Censor never sees the Magistrate's citations before conducting its own search. This prevents confirmation bias in trial proposals.
-
-**3. User consent gate is non-bypassable.** No trial can transition from `proposed` to `active` without the user explicitly approving in the chat interface. The system presents the protocol plus the Censor's review and waits. The `trials.status` column enforces valid transitions: `proposed -> approved -> active -> completed/abandoned`.
-
-**4. Confidence scores are mandatory for diet entries.** Every meal logged gets a confidence score (0-1) reflecting how certain the system is about portions and nutrient estimates. Photo-only estimates score 0.5, text with USDA lookup scores 0.7-0.8, user-verified entries score 1.0. The system never silently fabricates nutrition data; low confidence is flagged.
-
-**5. All timestamps are UTC ISO 8601.** Bare dates in queries are normalized to full-day bounds (start of day to end of day) by the data access layer. Display conversion to local timezone happens at the presentation layer only.
-
-**6. Maximum 2 concurrent active trials.** Enforced by the orchestrator to prevent confounders from overlapping interventions. If a user tries to start a third trial, the system explains the conflict and asks them to complete or abandon one first.
-
-**7. Statistical corrections are applied by default.** The Pattern Detector applies Benjamini-Hochberg FDR correction on every correlation scan. Effect sizes (Cohen's d) are always reported alongside p-values. Minimum observation thresholds are enforced (20 observations for trial baseline, 30 days for reliable pattern detection).
-
-**8. No cloud sync, ever.** Health data never leaves the local machine. The database file has `0600` permissions. The dashboard server binds to `127.0.0.1`. Nutrition API calls send only ingredient names. Literature searches send only scientific search queries. This is a hard architectural invariant, not a configuration option.
-
-**9. Causal analysis acknowledges its limitations.** The Bayesian STS implementation in `causal.py` explicitly documents that it assumes no unmeasured confounders. The `confounders()` method checks for concurrent interventions and metrics that correlate with intervention timing, but the system reports these as potential threats to validity rather than claiming to resolve them.
-
-**10. Agent prompts are the source of truth for behavior.** The 10 markdown files in `SKILL.md` and `agents/` define all system behavior. There is no hidden business logic in the Python layer. The data access layer is a thin CRUD wrapper; the modeling layer is pure statistics. All decision-making, formatting, and domain logic lives in the agent prompts. This makes the system auditable and modifiable by editing markdown.
-
 ---
 
 ## Conversation Examples
