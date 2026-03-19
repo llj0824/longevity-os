@@ -32,6 +32,8 @@ def _default_workspace_root() -> Path:
 def _skill_name(repo_root: Path) -> str:
     skill_source = repo_root / "SKILL.md"
     text = skill_source.read_text(encoding="utf-8")
+    if not text.startswith("---\n"):
+        raise ValueError(f"{skill_source} must start with valid YAML frontmatter")
     match = re.search(r"^name:\s*(.+?)\s*$", text, re.MULTILINE)
     if not match:
         raise ValueError(f"Could not find skill name in {skill_source}")
@@ -115,6 +117,8 @@ def check_install(repo_root: Path, workspace_root: Path, project_root: Path) -> 
     rendered_paths = _placeholders(repo_root, install_root, project_root)
     if skill_file.exists():
         skill_text = skill_file.read_text(encoding="utf-8")
+        if not skill_text.startswith("---\n"):
+            problems.append("Installed SKILL.md does not start with valid YAML frontmatter")
         if rendered_paths["{SCRIPTS_DIR}"] not in skill_text:
             problems.append("Installed SKILL.md does not reference the current repo scripts directory")
         if "{SCRIPTS_DIR}" in skill_text:
