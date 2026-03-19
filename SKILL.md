@@ -124,6 +124,7 @@ When dispatching an agent, provide this structured context:
 ## Context
 - Date/time: {current ISO 8601 timestamp}
 - Database: {DATABASE}
+- Scripts dir: {SCRIPTS_DIR}
 - Photos dir: {PHOTOS_DIR}
 
 ## Recent Context (if relevant)
@@ -481,8 +482,8 @@ This integration is lightweight — 太医院 does NOT write to the vault direct
 
 | User Says | You Do |
 |-----------|--------|
-| "Logged oatmeal for breakfast" | Dispatch shiyi → log diet_entry → confirm with macros |
-| "72.1 kg this morning" | Dispatch zhenmai → log body_metric → show 7-day trend |
+| "Logged oatmeal for breakfast" | Dispatch shiyi → run `scripts/log_meal.py` → confirm with macros |
+| "72.1 kg this morning" | Dispatch zhenmai → run `scripts/log_metrics.py` → show 7-day trend |
 | "Ran 5K in 28 minutes" | Dispatch daoyin → log exercise_entry → confirm with pace |
 | "Started creatine 5g daily" | Dispatch bencao → insert supplement → check interactions → confirm |
 | "Blood work: HbA1c 5.1, LDL 95" | Dispatch yanfang → log biomarkers → flag any out-of-range → compare to last panel |
