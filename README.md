@@ -90,7 +90,7 @@ Longevity OS is built as a **multi-agent skill**: 10 markdown agent prompts + MC
   <img src="docs/agent-flow.svg" alt="Agent Dispatch Flow" width="100%" />
 </p>
 
-For the current architecture, ownership boundaries, read and write sequences, and schema notes, see [`docs/architecture-current-state.md`](docs/architecture-current-state.md).
+For the current architecture, ranked gaps, branch delta, testing guidance, and remaining work, see [`docs/architecture-current-state.html`](docs/architecture-current-state.html).
 
 ---
 
@@ -479,7 +479,7 @@ After copying skills to your OpenClaw workspace (see [OpenClaw setup](#setup-on-
 
 The repo now includes a current-state architecture note for keyholders:
 
-- [`docs/architecture-current-state.md`](docs/architecture-current-state.md) covers the system overview, subsystem ownership, read/write sequences, state machines, data flow, DB schema slices, handoff boundaries, design decisions, and known ambiguities.
+- [`docs/architecture-current-state.html`](docs/architecture-current-state.html) is the primary deep-dive review artifact. It explains what exists today, where the current gaps are, what this branch addressed, how to test it, and what remains.
 
 If you are evaluating this as a Compound Life AI product rather than a code sample, start there after this README.
 
@@ -522,7 +522,7 @@ longevity-os/
 ├── scripts/                    # Setup, backup, import, export
 │   ├── demo_reset.py           # Reset, seed, and verify demo data
 └── docs/
-    ├── architecture-current-state.md  # Current ownership and boundary docs
+    ├── architecture-current-state.html  # Deep-dive review artifact
     ├── architecture.svg        # System architecture diagram
     ├── agent-flow.svg          # Agent dispatch flow
     ├── characters/             # 10 agent character illustrations
