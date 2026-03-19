@@ -385,19 +385,30 @@ Longevity OS is **natively compatible with OpenClaw**. The entire system is mark
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/albert-ying/longevity-os.git
+git clone https://github.com/llj0824/longevity-os.git
 
 # 2. Initialize the database
 cd longevity-os && python3 scripts/setup.py
 
-# 3. Copy agent prompts to your OpenClaw workspace
-cp SKILL.md ~/.openclaw/skills/longevity/skill.md
-cp agents/*.md ~/.openclaw/skills/longevity/agents/
+# 3. Render and install the skill into your OpenClaw workspace
+python3 scripts/install_openclaw_skill.py
 
-# 4. Enable MCP tools (PubMed, bioRxiv) via ClawHub or local config
+# 4. Verify the install is complete and points at this checkout
+python3 scripts/install_openclaw_skill.py --check
+
+# 5. Enable MCP tools (PubMed, bioRxiv) via ClawHub or local config
 ```
 
-Each of the 10 agents works as an independent OpenClaw skill. You can use the full system or pick individual modules (e.g., just the diet tracker or just the N-of-1 trial engine).
+What the installer does:
+
+- discovers your OpenClaw workspace from `~/.openclaw/openclaw.json`
+- renders `SKILL.md` into `skill.md` with the current checkout's absolute paths
+- copies and renders all agent prompts into `~/.openclaw/workspace/skills/longevity/agents/`
+- points the installed skill at the current runtime database under `LONGEVITY_OS_PROJECT_DIR` or the default `longevity-os-data` sibling
+
+This matters because copying the raw markdown files is not enough: the OpenClaw install needs rendered paths and the full agent set. If you switch worktrees or move the repo, rerun `python3 scripts/install_openclaw_skill.py`.
+
+Each of the 10 agents works as an independent OpenClaw skill. You can use the full system or pick individual modules (for example just the diet tracker or just the N-of-1 trial engine).
 
 ### Multi-Agent on OpenClaw
 
