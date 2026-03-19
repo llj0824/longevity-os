@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OpenClaw Teaser Screenplay</title>
+    <style>
+      :root {
+        --bg: #f3efe8;
+        --paper: #fffdf9;
+        --paper-2: #f7f2e9;
+        --ink: #1e2424;
+        --muted: #5d6768;
+        --line: rgba(30, 36, 36, 0.12);
+        --teal: #0b6b6f;
+        --teal-soft: rgba(11, 107, 111, 0.12);
+        --amber: #9a5e16;
+        --amber-soft: rgba(154, 94, 22, 0.12);
+        --rose: #a13f3f;
+        --rose-soft: rgba(161, 63, 63, 0.12);
+        --shadow: 0 18px 44px rgba(44, 41, 35, 0.08);
+      }
+
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        background:
+          radial-gradient(circle at top right, rgba(11, 107, 111, 0.08), transparent 26%),
+          linear-gradient(180deg, #f8f5ef 0%, var(--bg) 100%);
+        color: var(--ink);
+        font-family: "Aptos", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .page {
+        width: min(1180px, calc(100% - 32px));
+        margin: 28px auto 56px;
+      }
+
+      .content { display: grid; gap: 16px; }
+      .card {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        box-shadow: var(--shadow);
+      }
+
+      .toc, .hero, .section, .figure, .table-card { padding: 24px; }
+
+      .kicker {
+        margin: 0 0 10px;
+        color: var(--teal);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      h1, h2, h3, p, ul, li { margin: 0; }
+      h1, h2 {
+        font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+        letter-spacing: -0.03em;
+      }
+      h1 { font-size: clamp(34px, 5vw, 58px); line-height: 1.02; }
+      h2 { font-size: clamp(24px, 3vw, 34px); line-height: 1.08; }
+      h3 { font-size: 18px; line-height: 1.25; }
+      p, li, td, th { color: var(--muted); }
+      strong { color: var(--ink); }
+
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.92em;
+        background: var(--paper-2);
+        padding: 2px 6px;
+        border-radius: 6px;
+      }
+
+      .meta {
+        margin-top: 12px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .lede {
+        margin-top: 14px;
+        font-size: 18px;
+        max-width: 920px;
+      }
+
+      .toc-list, .summary-grid, .lane-grid, .scene-grid, .evidence-grid {
+        display: grid;
+        gap: 12px;
+      }
+
+      .toc-list a {
+        color: var(--ink);
+        text-decoration: none;
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        margin-top: 18px;
+      }
+
+      .summary-card, .mini-card, .scene-card {
+        padding: 16px;
+        border-radius: 16px;
+        background: var(--paper-2);
+        border: 1px solid rgba(30, 36, 36, 0.06);
+      }
+
+      .summary-card p, .mini-card p, .scene-card p { margin-top: 8px; }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .good { background: var(--teal-soft); color: var(--teal); }
+      .watch { background: var(--amber-soft); color: var(--amber); }
+      .risk { background: var(--rose-soft); color: var(--rose); }
+
+      .section-head {
+        display: grid;
+        grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+        gap: 20px;
+        align-items: start;
+        margin-bottom: 18px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+
+      th, td {
+        text-align: left;
+        vertical-align: top;
+        padding: 11px 12px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      th {
+        font-size: 12px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--ink);
+      }
+
+      .lane-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .lane {
+        padding: 18px;
+        border-radius: 18px;
+        border: 1px solid var(--line);
+        background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(246,241,231,0.9));
+      }
+
+      .lane.current {
+        box-shadow: inset 0 0 0 1px rgba(154, 94, 22, 0.08);
+      }
+
+      .lane.recommended {
+        box-shadow: inset 0 0 0 1px rgba(11, 107, 111, 0.08);
+      }
+
+      .scene-grid {
+        margin-top: 14px;
+      }
+
+      .time {
+        display: inline-block;
+        margin-bottom: 8px;
+        padding: 3px 8px;
+        border-radius: 999px;
+        background: rgba(30, 36, 36, 0.06);
+        color: var(--ink);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .dialogue {
+        margin-top: 10px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: rgba(11, 107, 111, 0.05);
+        border: 1px solid rgba(11, 107, 111, 0.08);
+      }
+
+      .caption {
+        margin-top: 10px;
+        font-size: 13px;
+      }
+
+      .note {
+        margin-top: 14px;
+        padding: 14px 16px;
+        border-radius: 14px;
+        background: rgba(154, 94, 22, 0.08);
+        border: 1px solid rgba(154, 94, 22, 0.12);
+      }
+
+      svg {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      @media (max-width: 960px) {
+        .section-head, .lane-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <div class="content">
+        <section class="card toc">
+          <p class="kicker">Contents</p>
+          <div class="toc-list">
+            <a href="#summary">Thesis and the actual seed-data gap</a>
+            <a href="#gap">Why the current seed is hard to demo</a>
+            <a href="#compare">Current teaser versus recommended teaser</a>
+            <a href="#screenplay">Screenplay details</a>
+            <a href="#implications">What seed changes unlock the better teaser</a>
+          </div>
+          <p class="meta">Updated 2026-03-19 22:10 CST</p>
+        </section>
+
+        <section class="card hero" id="summary">
+          <p class="kicker">Demo Story</p>
+          <h1>The current seed data demos competence. The recommended seed data demos intelligence.</h1>
+          <p class="lede">
+            The gap is <strong>not</strong> that the system lacks modules, commands, or internal agent structure. The gap is that the current seed does not produce a great <strong>teaser narrative</strong>. It gives us solid reporting, trial status, and biomarker summaries, but it does not naturally create the kind of mystery, explanation, escalation, and resolution that makes a short teaser video feel alive.
+          </p>
+          <div class="summary-grid">
+            <div class="summary-card">
+              <span class="status good">Current seed</span>
+              <h3>Can show reliability</h3>
+              <p>We can already show <code>/longevity Weekly report</code>, active trial status, and biomarker review with grounded data.</p>
+            </div>
+            <div class="summary-card">
+              <span class="status risk">Main gap</span>
+              <h3>No strong hook</h3>
+              <p>The strongest likely scenes are “here is your summary” scenes, not “here is the surprising thing I figured out” scenes.</p>
+            </div>
+            <div class="summary-card">
+              <span class="status watch">Best fix</span>
+              <h3>Seed a better teaser arc</h3>
+              <p>Create a default week with a visible mystery, a coordinator fan-out moment, and a cleaner experiment proposal that resolves the mystery.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="card section" id="gap">
+          <div class="section-head">
+            <div>
+              <p class="kicker">Gap Explained</p>
+              <h2>Why the current seed is hard to demo</h2>
+            </div>
+            <div>
+              <p>
+                When people say “the seed data gap,” what they really mean is:
+                <strong>what story does the user see in the first 45 to 75 seconds?</strong>
+                Right now that story is more “well-instrumented health dashboard” than “agent physician who noticed something, explained it, and proposed a test.”
+              </p>
+            </div>
+          </div>
+
+          <div class="table-card card">
+            <table>
+              <thead>
+                <tr>
+                  <th>Gap</th>
+                  <th>How it shows up in the teaser</th>
+                  <th>Why it weakens the demo</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>No immediate mystery</strong></td>
+                  <td>The report is grounded but often opens with healthy trends and stable progress.</td>
+                  <td>Good reporting is credible, but not inherently magnetic in a teaser.</td>
+                </tr>
+                <tr>
+                  <td><strong>Cross-module insight lands too softly</strong></td>
+                  <td>A likely current-week highlight is something like resting-HR trend improvement.</td>
+                  <td>That sounds competent, but it does not make viewers feel the coordinator just figured something out.</td>
+                </tr>
+                <tr>
+                  <td><strong>Multi-agent routing is mostly invisible</strong></td>
+                  <td>The coordinator exists, but the current seed does not force a sharp fan-out moment across several departments.</td>
+                  <td>The architecture is powerful, but the demo can look like a single smart report bot.</td>
+                </tr>
+                <tr>
+                  <td><strong>Best experiment scene is caveat-heavy</strong></td>
+                  <td>The protein-sleep trial is interesting, but it is more confounded than ideal for a bold teaser claim.</td>
+                  <td>The video either overclaims or has to spend precious seconds explaining caveats.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="note">
+            <strong>Short version:</strong> today’s seed lets us prove the bot works. It does not yet give us the cleanest “watch this bot discover something and act on it” teaser.
+          </div>
+        </section>
+
+        <section class="card figure" id="compare">
+          <p class="kicker">Teaser Comparison</p>
+          <h2>What the teaser video feels like now versus after the reseed</h2>
+          <svg viewBox="0 0 1140 250" role="img" aria-label="Current teaser arc versus recommended teaser arc.">
+            <rect x="28" y="36" width="514" height="170" rx="18" fill="#f6eee0" stroke="rgba(30,36,36,0.12)" />
+            <rect x="598" y="36" width="514" height="170" rx="18" fill="#e7f0ef" stroke="rgba(30,36,36,0.12)" />
+
+            <text x="56" y="70" font-size="14" font-weight="800" fill="#9a5e16" letter-spacing="1.4">CURRENT SEED TEASER</text>
+            <text x="56" y="106" font-size="28" font-family="Georgia, serif" fill="#1e2424">Competent but flat</text>
+            <text x="56" y="138" font-size="16" fill="#4a5455">summary -> trend -> status -> biomarker update</text>
+            <text x="56" y="164" font-size="16" fill="#4a5455">viewer reaction: “solid health copilot”</text>
+
+            <text x="626" y="70" font-size="14" font-weight="800" fill="#0b6b6f" letter-spacing="1.4">RECOMMENDED SEED TEASER</text>
+            <text x="626" y="106" font-size="28" font-family="Georgia, serif" fill="#1e2424">Mystery, explanation, experiment</text>
+            <text x="626" y="138" font-size="16" fill="#4a5455">sleep crash -> multi-agent explanation -> trial proposal -> approval</text>
+            <text x="626" y="164" font-size="16" fill="#4a5455">viewer reaction: “that bot actually reasoned”</text>
+
+            <path d="M116 192 C188 214, 266 214, 342 192 C414 171, 471 171, 516 188" fill="none" stroke="#9a5e16" stroke-width="4" />
+            <path d="M696 192 C750 132, 824 120, 888 154 C940 180, 1006 180, 1060 138" fill="none" stroke="#0b6b6f" stroke-width="4" />
+          </svg>
+          <p class="caption">
+            Current seed: we can cut a trustworthy teaser. Recommended seed: we can cut a teaser with a narrative beat. That is the real difference.
+          </p>
+        </section>
+
+        <section class="card section" id="screenplay">
+          <div class="section-head">
+            <div>
+              <p class="kicker">Screenplay</p>
+              <h2>Side-by-side teaser scripts</h2>
+            </div>
+            <div>
+              <p>
+                These are not abstract concepts. They are rough screenplay drafts for a short teaser video.
+                The point is to show how the same bot feels different depending on what the seed data gives it to say.
+              </p>
+            </div>
+          </div>
+
+          <div class="lane-grid">
+            <div class="lane current">
+              <p class="kicker">Version A</p>
+              <h3>Teaser we can cut today from the current seed</h3>
+              <div class="scene-grid">
+                <div class="scene-card">
+                  <span class="time">0:00 - 0:10</span>
+                  <strong>Open on Telegram</strong>
+                  <div class="dialogue">
+                    <p><strong>User:</strong> <code>/longevity Weekly report</code></p>
+                    <p><strong>Bot:</strong> “Diet 7/7 days. Exercise 7/7 days. Weight down. Sleep averaged 7.4 hours. Active creatine trial is on track.”</p>
+                  </div>
+                  <p class="caption">Feels grounded and polished. The weakness is that it opens like a summary video, not a discovery video.</p>
+                </div>
+
+                <div class="scene-card">
+                  <span class="time">0:10 - 0:22</span>
+                  <strong>Show one insight</strong>
+                  <div class="dialogue">
+                    <p><strong>Bot:</strong> “Cross-module insight: resting HR continues to trend down from baseline.”</p>
+                  </div>
+                  <p class="caption">Accurate, but not especially surprising or cinematic.</p>
+                </div>
+
+                <div class="scene-card">
+                  <span class="time">0:22 - 0:34</span>
+                  <strong>Jump to trial status</strong>
+                  <div class="dialogue">
+                    <p><strong>User:</strong> <code>/longevity How's the creatine trial going?</code></p>
+                    <p><strong>Bot:</strong> “Intervention phase, good compliance, continuing to collect working-memory and reaction-time observations.”</p>
+                  </div>
+                  <p class="caption">This is useful proof that the product is live, but it is still mostly a status read.</p>
+                </div>
+
+                <div class="scene-card">
+                  <span class="time">0:34 - 0:48</span>
+                  <strong>Finish with biomarkers</strong>
+                  <div class="dialogue">
+                    <p><strong>User:</strong> <code>/longevity My LDL is 105 and hs-CRP is 0.8. How am I doing?</code></p>
+                    <p><strong>Bot:</strong> “Both improved versus baseline. Vitamin D, triglycerides, and inflammation markers all moved in the right direction.”</p>
+                  </div>
+                  <p class="caption">Still good. The whole teaser now feels like “smart health summary bot.”</p>
+                </div>
+
+                <div class="scene-card">
+                  <span class="time">Net effect</span>
+                  <strong>What viewers take away</strong>
+                  <p>The bot is real, grounded, and impressive. But the teaser does not make the coordinator or multi-agent reasoning feel uniquely necessary.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="lane recommended">
+              <p class="kicker">Version B</p>
+              <h3>Teaser we could cut after the recommended seed changes</h3>
+              <div class="scene-grid">
+                <div class="scene-card">
+                  <span class="time">0:00 - 0:10</span>
+                  <strong>Open on a problem, not a report</strong>
+                  <div class="dialogue">
+                    <p><strong>User:</strong> <code>/longevity Why did my sleep and HRV crash last week?</code></p>
+                    <p><strong>Bot:</strong> “I found a likely stack of causes: late workouts, lower dinner protein, missed magnesium, and a travel-week schedule shift.”</p>
+                  </div>
+                  <p class="caption">Now the teaser starts with mystery plus explanation.</p>
+                </div>
+
+                <div class="scene-card">
+                  <span class="time">0:10 - 0:24</span>
+                  <strong>Show the coordinator fan-out</strong>
+                  <div class="dialogue">
+                    <p><strong>On-screen caption:</strong> Diet + exercise + body metrics + supplements.</p>
+                    <p><strong>Bot:</strong> “This does not look like a single-cause issue. The pattern is strongest on days with evening lifting and low-protein dinners.”</p>
+                  </div>
+                  <p class="caption">This is where the Imperial Physician actually looks like a coordinator.</p>
+                </div>
+
+                <div class="scene-card">
+                  <span class="time">0:24 - 0:40</span>
+                  <strong>Escalate into experiment design</strong>
+                  <div class="dialogue">
+                    <p><strong>User:</strong> <code>/longevity What should I test first?</code></p>
+                    <p><strong>Bot:</strong> “I recommend a 3-week evening-workout cutoff trial. I’m having Trial Design draft it and Safety Review check it.”</p>
+                  </div>
+                  <p class="caption">Now viewers see the internal graph matter, not just exist.</p>
+                </div>
+
+                <div class="scene-card">
+                  <span class="time">0:40 - 0:56</span>
+                  <strong>Show approval with caveats handled</strong>
+                  <div class="dialogue">
+                    <p><strong>Bot:</strong> “Approved with one condition: hold dinner calories steady so we isolate workout timing instead of changing two variables at once.”</p>
+                  </div>
+                  <p class="caption">This feels like a real physician workflow rather than a generic productivity agent.</p>
+                </div>
+
+                <div class="scene-card">
+                  <span class="time">0:56 - 1:08</span>
+                  <strong>End on live progress</strong>
+                  <div class="dialogue">
+                    <p><strong>User:</strong> <code>/longevity Start it</code></p>
+                    <p><strong>Cut to later:</strong> <code>/longevity How's the trial going?</code></p>
+                    <p><strong>Bot:</strong> “Intervention phase. Sleep onset is already improving, but it is too early to call the effect.”</p>
+                  </div>
+                  <p class="caption">The teaser now ends with continuity and anticipation.</p>
+                </div>
+
+                <div class="scene-card">
+                  <span class="time">Net effect</span>
+                  <strong>What viewers take away</strong>
+                  <p>The bot noticed something, explained it across modules, turned it into a disciplined experiment, and kept tracking it. That is a much stronger teaser identity.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card section" id="implications">
+          <div class="section-head">
+            <div>
+              <p class="kicker">Seed Implications</p>
+              <h2>What changes unlock the better teaser</h2>
+            </div>
+            <div>
+              <p>
+                The better teaser does not require a different product. It requires different seed emphasis.
+                We want the default demo week to contain one visible problem, one multi-agent explanation, and one clean experiment handoff.
+              </p>
+            </div>
+          </div>
+
+          <div class="evidence-grid">
+            <div class="mini-card">
+              <h3>1. Seed a visible problem week</h3>
+              <p>Add a short travel, stress, or late-workout week that hurts sleep and HRV enough to be noticed immediately.</p>
+            </div>
+            <div class="mini-card">
+              <h3>2. Make the coordinator fan out</h3>
+              <p>Ensure the problem spans diet, exercise, body metrics, and supplements so the multi-agent architecture shows up on screen.</p>
+            </div>
+            <div class="mini-card">
+              <h3>3. Promote one cleaner experiment</h3>
+              <p>Use a flagship trial that can be pitched and approved without a long confounder disclaimer.</p>
+            </div>
+            <div class="mini-card">
+              <h3>4. Put it in the demo week</h3>
+              <p>The strongest insight must appear in the default rehearsal window, not two weeks earlier or later.</p>
+            </div>
+          </div>
+
+          <div class="note">
+            <strong>Plain-English answer:</strong> the seed-data gap is that the current data mostly supports a good report demo, while the recommended data would support a good <em>story</em> demo.
+          </div>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>
