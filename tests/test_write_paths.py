@@ -94,30 +94,27 @@ class WritePathTests(unittest.TestCase):
 
     def test_log_metrics_writes_multiple_rows(self) -> None:
         payload = {
+            "timestamp": "2026-03-12T07:00:00+00:00",
             "entries": [
                 {
-                    "timestamp": "2026-03-12T07:00:00+00:00",
                     "metric_type": "weight",
                     "value": 72.5,
                     "unit": "kg",
                     "context": "morning fasted",
                 },
                 {
-                    "timestamp": "2026-03-12T07:00:00+00:00",
                     "metric_type": "blood_pressure_sys",
                     "value": 118,
                     "unit": "mmHg",
                     "context": "resting",
                 },
                 {
-                    "timestamp": "2026-03-12T07:00:00+00:00",
                     "metric_type": "blood_pressure_dia",
                     "value": 76,
                     "unit": "mmHg",
                     "context": "resting",
                 },
                 {
-                    "timestamp": "2026-03-12T07:00:00+00:00",
                     "metric_type": "resting_hr",
                     "value": 56,
                     "unit": "bpm",

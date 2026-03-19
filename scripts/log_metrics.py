@@ -5,6 +5,7 @@ Log one or more structured body metric payloads to the TaiYiYuan database.
 The script reads a JSON payload from stdin by default:
 
 {
+  "timestamp": "2026-03-12T07:00:00+00:00",
   "entries": [
     {"timestamp": "2026-03-12T07:00:00+00:00", "metric_type": "weight", "value": 72.5, "unit": "kg"},
     {"timestamp": "2026-03-12T07:00:00+00:00", "metric_type": "resting_hr", "value": 56, "unit": "bpm"}
@@ -65,18 +66,25 @@ def main() -> int:
             raise ValueError("entries must be a non-empty JSON array")
 
         created = []
+        default_timestamp = payload.get("timestamp")
+        default_context = payload.get("context")
+        default_device_method = payload.get("device_method")
+        default_notes = payload.get("notes")
         with TaiYiYuanDB() as db:
             for entry in entries:
                 if not isinstance(entry, dict):
                     raise ValueError("Each metric entry must be a JSON object")
+                timestamp = entry.get("timestamp", default_timestamp)
+                if timestamp in (None, ""):
+                    raise ValueError("Missing required field: timestamp")
                 metric_id = db.log_metric(
-                    timestamp=_require(entry, "timestamp"),
+                    timestamp=timestamp,
                     metric_type=_require(entry, "metric_type"),
                     value=float(_require(entry, "value")),
                     unit=_require(entry, "unit"),
-                    context=entry.get("context"),
-                    device_method=entry.get("device_method"),
-                    notes=entry.get("notes"),
+                    context=entry.get("context", default_context),
+                    device_method=entry.get("device_method", default_device_method),
+                    notes=entry.get("notes", default_notes),
                 )
                 created.append(
                     {
