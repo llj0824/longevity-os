@@ -66,7 +66,10 @@ def install_skill(repo_root: Path, workspace_root: Path, project_root: Path) -> 
     placeholders = _placeholders(repo_root, install_root, project_root)
 
     skill_source = repo_root / "SKILL.md"
-    rendered_skill = _render_text(skill_source.read_text(encoding="utf-8"), placeholders)
+    raw_skill = skill_source.read_text(encoding="utf-8")
+    if not raw_skill.startswith("---\n"):
+        raise ValueError(f"{skill_source} must start with valid YAML frontmatter")
+    rendered_skill = _render_text(raw_skill, placeholders)
     (install_root / "skill.md").write_text(rendered_skill, encoding="utf-8")
 
     copied_agents = []
@@ -104,6 +107,8 @@ def check_install(repo_root: Path, workspace_root: Path, project_root: Path) -> 
     rendered_paths = _placeholders(repo_root, install_root, project_root)
     if skill_file.exists():
         skill_text = skill_file.read_text(encoding="utf-8")
+        if not skill_text.startswith("---\n"):
+            problems.append("Installed SKILL.md does not start with valid YAML frontmatter")
         if rendered_paths["{SCRIPTS_DIR}"] not in skill_text:
             problems.append("Installed skill.md does not reference the current repo scripts directory")
         if "{SCRIPTS_DIR}" in skill_text:
