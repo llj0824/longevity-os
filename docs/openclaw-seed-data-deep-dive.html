@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OpenClaw Seed Data Deep Dive</title>
+    <style>
+      :root {
+        --bg: #f4f1ea;
+        --paper: #fffdf8;
+        --paper-2: #f6f1e7;
+        --ink: #1e2526;
+        --muted: #596366;
+        --line: rgba(30, 37, 38, 0.12);
+        --teal: #0b6b6f;
+        --teal-soft: rgba(11, 107, 111, 0.12);
+        --olive: #42634f;
+        --amber: #9a5e16;
+        --amber-soft: rgba(154, 94, 22, 0.12);
+        --rose: #9e3e3e;
+        --rose-soft: rgba(158, 62, 62, 0.12);
+        --shadow: 0 18px 44px rgba(44, 41, 35, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background:
+          radial-gradient(circle at top right, rgba(11, 107, 111, 0.08), transparent 30%),
+          linear-gradient(180deg, #f8f5ef 0%, var(--bg) 100%);
+        color: var(--ink);
+        font-family: "Aptos", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .page {
+        width: min(1120px, calc(100% - 32px));
+        margin: 28px auto 56px;
+      }
+
+      .content {
+        display: grid;
+        gap: 16px;
+      }
+
+      .card {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        box-shadow: var(--shadow);
+      }
+
+      .toc,
+      .hero,
+      .section,
+      .table-card {
+        padding: 24px;
+      }
+
+      .figure {
+        padding: 18px;
+      }
+
+      .toc-list,
+      .bullet-list,
+      .summary-grid,
+      .evidence-grid,
+      .metric-strip {
+        display: grid;
+        gap: 12px;
+      }
+
+      .toc-list a {
+        color: var(--ink);
+        text-decoration: none;
+      }
+
+      .toc-list a:hover {
+        color: var(--teal);
+      }
+
+      .kicker {
+        margin: 0 0 10px;
+        color: var(--teal);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3,
+      p,
+      ul,
+      li {
+        margin: 0;
+      }
+
+      h1,
+      h2 {
+        font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+        letter-spacing: -0.03em;
+      }
+
+      h1 {
+        font-size: clamp(34px, 5vw, 56px);
+        line-height: 1.02;
+      }
+
+      h2 {
+        font-size: clamp(24px, 3vw, 34px);
+        line-height: 1.08;
+      }
+
+      h3 {
+        font-size: 17px;
+        line-height: 1.25;
+      }
+
+      p,
+      li,
+      td,
+      th {
+        color: var(--muted);
+      }
+
+      strong {
+        color: var(--ink);
+      }
+
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.92em;
+        background: var(--paper-2);
+        padding: 2px 6px;
+        border-radius: 6px;
+      }
+
+      .meta {
+        margin-top: 12px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .lede {
+        margin-top: 14px;
+        font-size: 18px;
+        max-width: 820px;
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        margin-top: 18px;
+      }
+
+      .summary-card,
+      .evidence-card,
+      .mini-card {
+        padding: 16px;
+        border-radius: 16px;
+        background: var(--paper-2);
+        border: 1px solid rgba(30, 37, 38, 0.06);
+      }
+
+      .summary-card p,
+      .evidence-card p,
+      .mini-card p {
+        margin-top: 8px;
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .good {
+        background: var(--teal-soft);
+        color: var(--teal);
+      }
+
+      .watch {
+        background: var(--amber-soft);
+        color: var(--amber);
+      }
+
+      .risk {
+        background: var(--rose-soft);
+        color: var(--rose);
+      }
+
+      .section-head {
+        display: grid;
+        grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+        gap: 20px;
+        align-items: start;
+        margin-bottom: 18px;
+      }
+
+      .bullet-list {
+        padding-left: 20px;
+      }
+
+      .bullet-list li + li {
+        margin-top: 8px;
+      }
+
+      .metric-strip {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        margin-top: 14px;
+      }
+
+      .metric {
+        padding: 14px;
+        border-radius: 14px;
+        background: linear-gradient(180deg, rgba(11, 107, 111, 0.05), rgba(11, 107, 111, 0.01));
+        border: 1px solid rgba(11, 107, 111, 0.1);
+      }
+
+      .metric strong {
+        display: block;
+        font-size: 26px;
+        line-height: 1.1;
+      }
+
+      .evidence-grid {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        margin-top: 16px;
+      }
+
+      .figure-caption {
+        margin-top: 12px;
+        font-size: 13px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+
+      th,
+      td {
+        text-align: left;
+        vertical-align: top;
+        padding: 11px 12px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      th {
+        font-size: 12px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--ink);
+      }
+
+      .rank {
+        font-family: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+        font-size: 28px;
+        color: var(--teal);
+      }
+
+      .note {
+        margin-top: 14px;
+        padding: 14px 16px;
+        border-radius: 14px;
+        background: rgba(154, 94, 22, 0.08);
+        border: 1px solid rgba(154, 94, 22, 0.12);
+      }
+
+      svg {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      @media (max-width: 900px) {
+        .section-head {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <div class="content">
+        <section class="card toc">
+          <p class="kicker">Contents</p>
+          <div class="toc-list">
+            <a href="#summary">Thesis and recommendation</a>
+            <a href="#coverage">What the current seed proves</a>
+            <a href="#narrative">Why the story is coherent but not yet cinematic</a>
+            <a href="#ranked">Ranked seed-data changes</a>
+            <a href="#evidence">Evidence and limits</a>
+          </div>
+          <p class="meta">Updated 2026-03-19 21:43 CST</p>
+        </section>
+
+        <section class="card hero" id="summary">
+          <p class="kicker">OpenClaw Demo Readiness</p>
+          <h1>The seed data is broad enough to prove the Telegram skill, but not yet sharp enough to make the live demo feel inevitable.</h1>
+          <p class="lede">
+            The current seed gives Longevity OS real coverage across diet, exercise, metrics, biomarkers, supplements, and trials, which is exactly why the repo can already sustain a typed <code>/longevity Weekly report</code> rehearsal. The main weakness is not breadth. It is dramatic focus. The strongest seeded stories either stay too smooth, land outside the likely demo week, or are visibly confounded once the modeling outputs are inspected.
+          </p>
+          <div class="summary-grid">
+            <div class="summary-card">
+              <span class="status good">Strong Now</span>
+              <h3>Coverage breadth</h3>
+              <p>90 days, 2,530 rows, every major table populated, one completed trial, one active trial, and enough density for grounded weekly-report and status scenes.</p>
+            </div>
+            <div class="summary-card">
+              <span class="status risk">Main Gap</span>
+              <h3>Weak demo hook</h3>
+              <p>The “hero” protein-sleep story is impressive but confounded, and the likely live weekly-report week surfaces only a mild single-module trend instead of a memorable cross-module reveal.</p>
+            </div>
+            <div class="summary-card">
+              <span class="status watch">Best Next Move</span>
+              <h3>Reseed around one flagship moment</h3>
+              <p>Center the dataset on one cleaner experiment plus one visible setback-and-recovery week, then align insight timing so the default Telegram scenes hit the strongest narrative.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="card section" id="coverage">
+          <div class="section-head">
+            <div>
+              <p class="kicker">Current State</p>
+              <h2>What the current seed already proves</h2>
+            </div>
+            <div>
+              <p>
+                The seed generator in <code>scripts/generate_demo_data.py</code> produces a coherent three-phase arc:
+                January baseline, February intervention, March optimization. That arc is visible in both row counts and the actual metric progression, which makes the dataset credible for a grounded product demo rather than a thin fixture set.
+              </p>
+            </div>
+          </div>
+
+          <div class="metric-strip">
+            <div class="metric">
+              <strong>349</strong>
+              <span>Meals across 90 days</span>
+            </div>
+            <div class="metric">
+              <strong>65</strong>
+              <span>Exercise sessions</span>
+            </div>
+            <div class="metric">
+              <strong>571</strong>
+              <span>Body-metric rows</span>
+            </div>
+            <div class="metric">
+              <strong>75</strong>
+              <span>Biomarker results</span>
+            </div>
+            <div class="metric">
+              <strong>2</strong>
+              <span>Trials, with 118 observations</span>
+            </div>
+            <div class="metric">
+              <strong>8</strong>
+              <span>Seeded insights</span>
+            </div>
+          </div>
+
+          <div class="table-card card" style="margin-top: 16px;">
+            <p class="kicker">Intent Coverage</p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Skill surface</th>
+                  <th>Support</th>
+                  <th>Why</th>
+                  <th>Demo value today</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Weekly report</strong></td>
+                  <td><span class="status good">Strong</span></td>
+                  <td>All core tables have enough density for summaries, trends, and trial progress.</td>
+                  <td>Best proven Telegram scene right now.</td>
+                </tr>
+                <tr>
+                  <td><strong>Trial status</strong></td>
+                  <td><span class="status good">Strong</span></td>
+                  <td>The active creatine trial is midstream with good compliance and clean phase dates.</td>
+                  <td>Explains that the system is live, not static.</td>
+                </tr>
+                <tr>
+                  <td><strong>Biomarker review</strong></td>
+                  <td><span class="status good">Strong</span></td>
+                  <td>Three lab panels show clear improvement in CRP, vitamin D, LDL, triglycerides, HbA1c, and insulin.</td>
+                  <td>Good evidence of longitudinal reasoning.</td>
+                </tr>
+                <tr>
+                  <td><strong>Trial proposal</strong></td>
+                  <td><span class="status watch">Medium</span></td>
+                  <td>There are trial candidates, but the checked-in candidate list is dominated by generic covariation rather than compelling behavior-change stories.</td>
+                  <td>Usable, but not yet a wow moment.</td>
+                </tr>
+                <tr>
+                  <td><strong>Supplement reasoning</strong></td>
+                  <td><span class="status watch">Medium</span></td>
+                  <td>The stack shows benefit, but almost no tension, adherence drift, or side-effect tradeoffs.</td>
+                  <td>Reads informative, not dramatic.</td>
+                </tr>
+                <tr>
+                  <td><strong>Multi-intent chat handling</strong></td>
+                  <td><span class="status risk">Weak</span></td>
+                  <td>The seed is analytic and orderly. It has very little of the messy, mixed-language, partial-information texture that real Telegram use creates.</td>
+                  <td>Harder to show that OpenClaw handles natural chat chaos.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card figure" id="narrative">
+          <p class="kicker">Narrative Anatomy</p>
+          <h2>Why the story is coherent but not yet cinematic</h2>
+          <svg viewBox="0 0 1040 430" role="img" aria-label="Three-phase seed-data narrative with demo strengths and weaknesses.">
+            <defs>
+              <linearGradient id="phaseA" x1="0%" x2="100%">
+                <stop offset="0%" stop-color="#e8f1ef" />
+                <stop offset="100%" stop-color="#d9ebe7" />
+              </linearGradient>
+              <linearGradient id="phaseB" x1="0%" x2="100%">
+                <stop offset="0%" stop-color="#eef3ea" />
+                <stop offset="100%" stop-color="#dfe8d8" />
+              </linearGradient>
+              <linearGradient id="phaseC" x1="0%" x2="100%">
+                <stop offset="0%" stop-color="#f6eee0" />
+                <stop offset="100%" stop-color="#f0e2c5" />
+              </linearGradient>
+            </defs>
+
+            <rect x="24" y="78" width="308" height="150" rx="20" fill="url(#phaseA)" stroke="rgba(30,37,38,0.12)" />
+            <rect x="366" y="78" width="308" height="150" rx="20" fill="url(#phaseB)" stroke="rgba(30,37,38,0.12)" />
+            <rect x="708" y="78" width="308" height="150" rx="20" fill="url(#phaseC)" stroke="rgba(30,37,38,0.12)" />
+
+            <text x="48" y="112" font-size="14" font-weight="800" fill="#0b6b6f" letter-spacing="1.5">JANUARY BASELINE</text>
+            <text x="48" y="144" font-size="28" font-family="Georgia, serif" fill="#1e2526">Loose habits</text>
+            <text x="48" y="174" font-size="16" fill="#3f4b4d">109g protein/day</text>
+            <text x="48" y="198" font-size="16" fill="#3f4b4d">6.46h sleep</text>
+            <text x="48" y="222" font-size="16" fill="#3f4b4d">HRV 35.13 ms</text>
+
+            <text x="390" y="112" font-size="14" font-weight="800" fill="#42634f" letter-spacing="1.5">FEBRUARY INTERVENTION</text>
+            <text x="390" y="144" font-size="28" font-family="Georgia, serif" fill="#1e2526">More protein and training</text>
+            <text x="390" y="174" font-size="16" fill="#3f4b4d">149g protein/day</text>
+            <text x="390" y="198" font-size="16" fill="#3f4b4d">6.85h sleep</text>
+            <text x="390" y="222" font-size="16" fill="#3f4b4d">Completed protein trial</text>
+
+            <text x="732" y="112" font-size="14" font-weight="800" fill="#9a5e16" letter-spacing="1.5">MARCH OPTIMIZATION</text>
+            <text x="732" y="144" font-size="28" font-family="Georgia, serif" fill="#1e2526">Stable high-functioning phase</text>
+            <text x="732" y="174" font-size="16" fill="#3f4b4d">151.5g protein/day</text>
+            <text x="732" y="198" font-size="16" fill="#3f4b4d">7.43h sleep</text>
+            <text x="732" y="222" font-size="16" fill="#3f4b4d">Creatine trial active</text>
+
+            <path d="M178 252 C256 314, 378 322, 520 294 C651 268, 786 212, 890 184" fill="none" stroke="#0b6b6f" stroke-width="5" stroke-linecap="round"/>
+            <circle cx="178" cy="252" r="8" fill="#0b6b6f" />
+            <circle cx="520" cy="294" r="8" fill="#0b6b6f" />
+            <circle cx="890" cy="184" r="8" fill="#0b6b6f" />
+            <text x="46" y="334" font-size="15" fill="#3f4b4d">The data tells a believable improvement arc.</text>
+            <text x="46" y="358" font-size="15" fill="#3f4b4d">The tradeoff is that most movement is smooth and mutually reinforcing,</text>
+            <text x="46" y="382" font-size="15" fill="#3f4b4d">which makes the seed feel healthy and coherent but reduces the sharpness of the live reveal.</text>
+          </svg>
+          <p class="figure-caption">
+            The dataset already has a real internal logic. The problem is that almost every metric improves together. That is great for credibility, but it weakens the “why did this happen?” and “what should I test next?” scenes that make a live Telegram skill feel intelligent.
+          </p>
+
+          <div class="evidence-grid">
+            <div class="evidence-card">
+              <span class="status good">Works Well</span>
+              <h3>Longitudinal biomarker arc</h3>
+              <p>Vitamin D rises from 22 to 48 ng/mL while hs-CRP falls from 2.1 to 0.8. This is one of the cleanest before-and-after stories in the seed.</p>
+            </div>
+            <div class="evidence-card">
+              <span class="status risk">Undersells Intelligence</span>
+              <h3>Default weekly report week</h3>
+              <p>The grounded report for Mar 13-19 is complete, but its only surfaced insight is a resting-heart-rate trend. That is reliable, not memorable.</p>
+            </div>
+            <div class="evidence-card">
+              <span class="status risk">Hero trial is confounded</span>
+              <h3>Protein-sleep scene</h3>
+              <p>The checked-in causal artifact shows a large effect, but it also flags concurrent changes in calories, exercise, fasting glucose, HRV, and resting HR.</p>
+            </div>
+            <div class="evidence-card">
+              <span class="status watch">Candidate ranking drifts generic</span>
+              <h3>Trial-proposal surface</h3>
+              <p>The checked-in trial-candidate output is led by correlations like calories to protein and calories to carbs. That looks mathematically busy, not product-smart.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="card section" id="ranked">
+          <div class="section-head">
+            <div>
+              <p class="kicker">Ranked Changes</p>
+              <h2>Seed-data changes that would most improve the OpenClaw demo</h2>
+            </div>
+            <div>
+              <p>
+                This ranking is product-first, not stats-first. The question is not merely “what makes the dataset richer?” It is “what makes the live Telegram run-through feel obviously intelligent in under two minutes?”
+              </p>
+            </div>
+          </div>
+
+          <div class="table-card card">
+            <table>
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Change</th>
+                  <th>Why it matters</th>
+                  <th>Likely touchpoints</th>
+                  <th>New demo moment</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="rank">1</td>
+                  <td>
+                    <strong>Promote one flagship, minimally confounded experiment.</strong>
+                    Keep either the protein-at-dinner story or the evening-exercise story, but isolate it much more cleanly during its trial window.
+                  </td>
+                  <td>
+                    The current protein-sleep trial is attractive on paper yet undermines itself once the causal output is opened. For a live demo, that turns the best scene into a caveat-heavy one.
+                  </td>
+                  <td>
+                    <code>gen_trial_1_observations</code>,
+                    <code>plan_meals</code>,
+                    <code>plan_exercise_schedule</code>,
+                    <code>gen_body_metrics</code>
+                  </td>
+                  <td>“We tested one behavior change and here is the causal readout without obvious contamination.”</td>
+                </tr>
+                <tr>
+                  <td class="rank">2</td>
+                  <td>
+                    <strong>Seed a “wow” weekly-report window around the actual rehearsal week.</strong>
+                    Add or move one cross-module insight so the default March report surfaces a surprising, explainable relationship.
+                  </td>
+                  <td>
+                    The proven Telegram command today is weekly report. That surface should not land on a mild resting-HR trend if we want the demo to sell the agent as a thinker.
+                  </td>
+                  <td>
+                    <code>INSIGHTS</code>,
+                    <code>gen_body_metrics</code>,
+                    <code>plan_meals</code>,
+                    <code>plan_exercise_schedule</code>
+                  </td>
+                  <td>“This week your late workouts hurt sleep” or “protein distribution predicted better sleep quality,” right in the default report.</td>
+                </tr>
+                <tr>
+                  <td class="rank">3</td>
+                  <td>
+                    <strong>Add one short setback-and-recovery arc.</strong>
+                    Seed 4-6 days of travel, illness, stress, or schedule disruption that temporarily breaks the optimization trend.
+                  </td>
+                  <td>
+                    Right now the seed mostly gets better in a smooth line. That makes anomaly detection feel ornamental. A brief disruption creates a real “what happened?” scene for Telegram.
+                  </td>
+                  <td>
+                    <code>plan_meals</code>,
+                    <code>plan_exercise_schedule</code>,
+                    <code>gen_body_metrics</code>,
+                    <code>INSIGHTS</code>
+                  </td>
+                  <td>“Why did my HRV tank last week?” followed by a cross-module explanation and recovery plan.</td>
+                </tr>
+                <tr>
+                  <td class="rank">4</td>
+                  <td>
+                    <strong>Make the trial-candidate surface less tautological through sharper domain signals.</strong>
+                    Seed stronger behavior-outcome patterns so meaningful candidates outrank generic macro covariation.
+                  </td>
+                  <td>
+                    A proposal engine that recommends “increase calories to affect protein” looks statistically active but semantically dull. Better signal structure in the seed will make the product appear smarter without changing the prompt.
+                  </td>
+                  <td>
+                    <code>plan_meals</code>,
+                    <code>gen_body_metrics</code>,
+                    <code>gen_trial_1_observations</code>,
+                    <code>INSIGHTS</code>
+                  </td>
+                  <td>“What should I test next?” yields a believable human-relevant experiment, not a nutrition tautology.</td>
+                </tr>
+                <tr>
+                  <td class="rank">5</td>
+                  <td>
+                    <strong>Add one messy, chat-native edge-case track.</strong>
+                    Seed a few ambiguous descriptions, mixed English-Chinese meal strings, low-confidence logs, and one supplement or protocol tension that invites review.
+                  </td>
+                  <td>
+                    The seed currently demonstrates clean analytics better than real conversational use. Telegram demos benefit from showing that the skill handles rough input and tradeoffs, not only pristine tables.
+                  </td>
+                  <td>
+                    <code>plan_meals</code>,
+                    diet entry notes and confidence fields,
+                    <code>SUPPLEMENTS</code>,
+                    <code>INSIGHTS</code>
+                  </td>
+                  <td>“I had 豆浆油条 and maybe a latte after lifting” becomes a believable mixed-intent logging and reasoning moment.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="note">
+            <strong>Recommended implementation order:</strong> reseed the flagship experiment first, then align the weekly-report week, then add the setback arc. Those three changes alone would materially improve the OpenClaw rehearsal without expanding the seed generator into a full scenario framework.
+          </div>
+        </section>
+
+        <section class="card section" id="evidence">
+          <div class="section-head">
+            <div>
+              <p class="kicker">Evidence</p>
+              <h2>What this deep dive is grounded in</h2>
+            </div>
+            <div>
+              <p>
+                This artifact was built from the current repo state, the active PR description, a fresh run of <code>python3 scripts/demo_reset.py</code>, grounded report and status scripts, and the checked-in modeling artifacts under <code>docs/demo-output/</code>.
+              </p>
+            </div>
+          </div>
+
+          <div class="evidence-grid">
+            <div class="mini-card">
+              <h3>Freshly verified</h3>
+              <p>Seed reset succeeded and reproduced 2,530 rows with the expected 2026-01-01 to 2026-03-31 coverage.</p>
+            </div>
+            <div class="mini-card">
+              <h3>Freshly verified</h3>
+              <p><code>scripts/weekly_report.py</code> shows the seed is operational for the Telegram report scene today.</p>
+            </div>
+            <div class="mini-card">
+              <h3>Freshly verified</h3>
+              <p><code>scripts/trial_status.py --all-active</code> confirms the creatine trial is live midstream with good compliance.</p>
+            </div>
+            <div class="mini-card">
+              <h3>Checked-in evidence</h3>
+              <p><code>docs/demo-output/causal-trial-analysis.txt</code> and <code>trial-candidates.txt</code> were used to judge the current “hero” story and trial-proposal quality.</p>
+            </div>
+          </div>
+
+          <div class="note">
+            <strong>Limit:</strong> the heavier modeling CLIs were not re-run in this environment because local Python dependencies such as <code>numpy</code> are currently missing. Where deeper modeling behavior is discussed, this page relies on the checked-in demo-output artifacts already present in the repo rather than a new local recomputation.
+          </div>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>
