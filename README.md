@@ -456,6 +456,17 @@ EOF
 
 These scripts are the write contracts the meal and metric agents should call once they have parsed the user message into structured data.
 
+### Grounded Read Surfaces
+
+For read-side proof, the repo now has explicit report and trial-status scripts instead of relying on a fictional `data/db.py` query CLI:
+
+```bash
+python3 scripts/weekly_report.py --start 2026-03-23 --end 2026-03-29
+python3 scripts/trial_status.py --all-active --as-of-date 2026-03-19
+```
+
+These scripts read directly from the seeded SQLite runtime and return grounded JSON payloads for the report and trial-status scenes.
+
 ---
 
 ## Quick Start
@@ -541,6 +552,8 @@ longevity-os/
 │   ├── demo_reset.py           # Reset, seed, and verify demo data
 │   ├── log_meal.py             # Durable meal write surface
 │   ├── log_metrics.py          # Durable body-metric write surface
+│   ├── weekly_report.py        # Grounded weekly report surface
+│   ├── trial_status.py         # Grounded trial status surface
 └── docs/
     ├── architecture-current-state.html  # Deep-dive review artifact
     ├── architecture.svg        # System architecture diagram
