@@ -9,6 +9,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 INSTALL_SCRIPT = REPO_ROOT / "scripts" / "install_openclaw_skill.py"
+CHECK_SCRIPT = REPO_ROOT / "scripts" / "check_clawhub_bundle.py"
 SKILL_SOURCE = REPO_ROOT / "SKILL.md"
 
 
@@ -20,11 +21,24 @@ class OpenClawInstallTests(unittest.TestCase):
             "Repo SKILL.md must begin with YAML frontmatter",
         )
         self.assertIn("name: longevity\n", source_text)
+        self.assertIn("{baseDir}", source_text)
+        self.assertNotIn("{SCRIPTS_DIR}", source_text)
 
-    def test_install_and_check_render_openclaw_skill(self) -> None:
-        with tempfile.TemporaryDirectory() as workspace_dir, tempfile.TemporaryDirectory() as project_dir:
+    def test_bundle_validator_passes_portable_bundle_rules(self) -> None:
+        proc = subprocess.run(
+            ["python3", str(CHECK_SCRIPT)],
+            cwd=str(REPO_ROOT),
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+        result = json.loads(proc.stdout)
+        self.assertEqual(result["status"], "ok")
+        self.assertEqual(result["problems"], [])
+
+    def test_install_and_check_portable_openclaw_skill(self) -> None:
+        with tempfile.TemporaryDirectory() as workspace_dir:
             workspace_root = Path(workspace_dir)
-            project_root = Path(project_dir)
 
             install_proc = subprocess.run(
                 [
@@ -32,8 +46,6 @@ class OpenClawInstallTests(unittest.TestCase):
                     str(INSTALL_SCRIPT),
                     "--workspace",
                     str(workspace_root),
-                    "--project-dir",
-                    str(project_root),
                     "--repo-root",
                     str(REPO_ROOT),
                 ],
@@ -45,17 +57,21 @@ class OpenClawInstallTests(unittest.TestCase):
             install_result = json.loads(install_proc.stdout)
             self.assertEqual(install_result["status"], "success")
 
-            skill_file = workspace_root / "skills" / "longevity" / "skill.md"
+            install_root = workspace_root / "skills" / "longevity"
+            skill_file = install_root / "SKILL.md"
             agents_dir = workspace_root / "skills" / "longevity" / "agents"
             self.assertTrue(skill_file.exists())
             self.assertTrue(agents_dir.exists())
             self.assertTrue((agents_dir / "shiyi.md").exists())
+            self.assertTrue((install_root / "scripts" / "setup.py").exists())
+            self.assertTrue((install_root / "modeling" / "engine.py").exists())
+            self.assertTrue((install_root / "dashboard" / "dashboard.html").exists())
+            self.assertTrue((install_root / "requirements.txt").exists())
 
             skill_text = skill_file.read_text(encoding="utf-8")
             self.assertTrue(skill_text.startswith("---\n"))
             self.assertIn("name: longevity\n", skill_text)
-            self.assertIn(str(REPO_ROOT / "scripts"), skill_text)
-            self.assertIn(str(project_root / "data" / "taiyiyuan.db"), skill_text)
+            self.assertIn("{baseDir}", skill_text)
             self.assertNotIn("{SCRIPTS_DIR}", skill_text)
 
             check_proc = subprocess.run(
@@ -64,8 +80,6 @@ class OpenClawInstallTests(unittest.TestCase):
                     str(INSTALL_SCRIPT),
                     "--workspace",
                     str(workspace_root),
-                    "--project-dir",
-                    str(project_root),
                     "--repo-root",
                     str(REPO_ROOT),
                     "--check",

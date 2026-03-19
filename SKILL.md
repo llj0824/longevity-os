@@ -1,6 +1,7 @@
 ---
 name: longevity
 description: Triggers on /longevity and /taiyiyuan. Log, query, and analyze personal health data in Longevity OS (太医院), including meals, workouts, sleep, body metrics, supplements, lab results, and N-of-1 trials stored in the local SQLite database. Use when the user wants to record a health event, review their tracked data, check trial status, explain a biomarker change, detect patterns, or get a daily or weekly plan grounded in their own data. Don't use for generic medical advice, symptom triage, or health questions not tied to the user's logged data.
+metadata: {"openclaw":{"homepage":"https://github.com/albert-ying/longevity-os","requires":{"anyBins":["python3","python"]}}}
 ---
 
 # 太医院 (Tai Yi Yuan) — Imperial Medical Academy
@@ -42,19 +43,19 @@ Negative trigger examples:
 ## System Paths
 
 ```
-SKILL_DIR     = directory containing this file
-AGENTS_DIR    = {SKILL_DIR}/agents/
-MODELING_DIR  = {SKILL_DIR}/modeling/
-DATA_DIR      = {SKILL_DIR}/data/
-SCRIPTS_DIR   = {SKILL_DIR}/scripts/
+SKILL_DIR     = {baseDir}
+AGENTS_DIR    = {baseDir}/agents/
+MODELING_DIR  = {baseDir}/modeling/
+DATA_DIR      = {baseDir}/data/
+SCRIPTS_DIR   = {baseDir}/scripts/
 
-PROJECT_DIR   = LONGEVITY_OS_PROJECT_DIR if set, else sibling directory named longevity-os-data next to {SKILL_DIR}
-DATABASE      = LONGEVITY_OS_DB_PATH if set, else {PROJECT_DIR}/data/taiyiyuan.db
-REPORTS_DIR   = {PROJECT_DIR}/reports/
-PHOTOS_DIR    = {PROJECT_DIR}/photos/
-TRIALS_DIR    = {PROJECT_DIR}/trials/
+PROJECT_DIR   = LONGEVITY_OS_PROJECT_DIR if set, else sibling directory named longevity-os-data next to {baseDir}
+DATABASE      = LONGEVITY_OS_DB_PATH if set, else PROJECT_DIR/data/taiyiyuan.db
+REPORTS_DIR   = PROJECT_DIR/reports/
+PHOTOS_DIR    = PROJECT_DIR/photos/
+TRIALS_DIR    = PROJECT_DIR/trials/
 
-SCHEMA_FILE   = {DATA_DIR}/schema.sql
+SCHEMA_FILE   = {baseDir}/data/schema.sql
 ```
 
 ---
@@ -63,11 +64,11 @@ SCHEMA_FILE   = {DATA_DIR}/schema.sql
 
 On first invocation (or if the database file is missing):
 
-1. Check if `{DATABASE}` exists: `ls {DATABASE}`
+1. Check if the resolved database path exists by running `python3 {baseDir}/scripts/query_sqlite.py --sql "SELECT 1"`.
 2. If it does NOT exist:
-   a. Initialize via the setup script: `python3 {SCRIPTS_DIR}/setup.py`
+   a. Initialize via the setup script: `python3 {baseDir}/scripts/setup.py`
    b. Treat `scripts/setup.py` as the source of truth for directory creation, schema setup, and file permissions.
-   c. Inform the user: "Initialized 太医院 database at `{DATABASE}`."
+   c. Inform the user with the resolved database path returned by the setup script.
 3. If it exists, proceed normally.
 
 ---
@@ -121,12 +122,12 @@ Parse the user's input and classify into one of the following intents. The user 
 For each dispatch to a department agent:
 
 ```
-1. Read the agent prompt:  Read({AGENTS_DIR}/{agent_name}.md)
+1. Read the agent prompt: `Read({baseDir}/agents/{agent_name}.md)`
 2. Construct the task payload:
    - Agent system prompt (from the file)
    - User input (verbatim)
    - Context (current date/time, relevant recent entries if needed)
-   - Database path: {DATABASE}
+   - Database path: resolved by the runtime scripts from `LONGEVITY_OS_DB_PATH` or `LONGEVITY_OS_PROJECT_DIR`
 3. Dispatch via the Agent tool
 4. Collect the agent's structured JSON response
 5. Format the response for the user (see Response Format below)
@@ -151,9 +152,9 @@ When dispatching an agent, provide this structured context:
 
 ## Context
 - Date/time: {current ISO 8601 timestamp}
-- Database: {DATABASE}
-- Scripts dir: {SCRIPTS_DIR}
-- Photos dir: {PHOTOS_DIR}
+- Database: resolved at runtime from `LONGEVITY_OS_DB_PATH` or `LONGEVITY_OS_PROJECT_DIR`
+- Scripts dir: `{baseDir}/scripts`
+- Photos dir: resolved at runtime from `LONGEVITY_OS_PROJECT_DIR`
 
 ## Recent Context (if relevant)
 {Last 2-3 entries from the relevant table, fetched via SQL}
@@ -368,8 +369,8 @@ When the user requests a weekly report (or on Sunday evening automatically if pr
    c. Compares to previous week and to targets
    d. Identifies the week's top insight or pattern
    e. Generates a full report
-4. Use `python3 {SCRIPTS_DIR}/weekly_report.py --start {YYYY-MM-DD} --end {YYYY-MM-DD}` as the grounded report surface
-5. Save the report to `{REPORTS_DIR}/weekly-{YYYY}-W{NN}.md`
+4. Use `python3 {baseDir}/scripts/weekly_report.py --start {YYYY-MM-DD} --end {YYYY-MM-DD}` as the grounded report surface
+5. Save the report to the runtime reports directory returned by that script (typically `LONGEVITY_OS_PROJECT_DIR/reports/weekly-{YYYY}-W{NN}.md`)
 6. Present a summary to the user; full report available at the file path
 
 ---
@@ -433,12 +434,12 @@ For Chinese dishes (红烧肉, 宫保鸡丁, etc.):
 
 Agents should prefer dedicated runtime scripts for writes and the read-only query helper for ad hoc inspection:
 
-- `python3 {SCRIPTS_DIR}/log_meal.py`
-- `python3 {SCRIPTS_DIR}/log_metrics.py`
-- `python3 {SCRIPTS_DIR}/log_exercise.py`
-- `python3 {SCRIPTS_DIR}/log_biomarkers.py`
-- `python3 {SCRIPTS_DIR}/manage_supplements.py`
-- `python3 {SCRIPTS_DIR}/query_sqlite.py --sql ...`
+- `python3 {baseDir}/scripts/log_meal.py`
+- `python3 {baseDir}/scripts/log_metrics.py`
+- `python3 {baseDir}/scripts/log_exercise.py`
+- `python3 {baseDir}/scripts/log_biomarkers.py`
+- `python3 {baseDir}/scripts/manage_supplements.py`
+- `python3 {baseDir}/scripts/query_sqlite.py --sql ...`
 
 Use raw SQL only inside the payload passed to `query_sqlite.py`, not by pretending there is a hidden database shell.
 

@@ -62,7 +62,7 @@ custom_metric_definitions (
 
 # Tools Available
 
-- **Bash**: Run `python3 {SCRIPTS_DIR}/log_metrics.py` and pass a structured JSON payload on stdin for durable writes.
+- **Bash**: Run `python3 {baseDir}/scripts/log_metrics.py` and pass a structured JSON payload on stdin for durable writes.
 
 # Input Format
 
@@ -178,4 +178,4 @@ When alerts are warranted:
 
 12. **Reject nonsensical values.** Weight of 500kg, HR of 300, temperature of 50C — reject with an error message. Do not log obviously erroneous data.
 
-13. **Use the write script, not an imaginary db CLI.** After parsing and validation, write the durable rows via `python3 {SCRIPTS_DIR}/log_metrics.py` with a JSON payload on stdin. Do not claim success unless the script returns success.
+13. **Use the write script, not an imaginary db CLI.** After parsing and validation, write the durable rows via `python3 {baseDir}/scripts/log_metrics.py` with a JSON payload on stdin. Do not claim success unless the script returns success.

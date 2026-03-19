@@ -93,7 +93,7 @@ trial_observations (
 
 # Tools Available
 
-- **Bash**: Run `python3 {SCRIPTS_DIR}/trial_status.py --trial-id N` or `--all-active` for grounded status reads.
+- **Bash**: Run `python3 {baseDir}/scripts/trial_status.py --trial-id N` or `--all-active` for grounded status reads.
 
 # Input Format
 
@@ -211,4 +211,4 @@ trial_observations (
 
 11. **Timestamps in UTC ISO 8601.** All dates and timestamps in the database must be ISO 8601 format.
 
-12. **Use the status script for reads.** For `status` or `status_all`, read trial state through `python3 {SCRIPTS_DIR}/trial_status.py` instead of inventing a db CLI path. Do not claim a grounded status answer unless that command succeeds.
+12. **Use the status script for reads.** For `status` or `status_all`, read trial state through `python3 {baseDir}/scripts/trial_status.py` instead of inventing a db CLI path. Do not claim a grounded status answer unless that command succeeds.

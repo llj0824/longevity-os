@@ -118,7 +118,7 @@ biomarkers (
 
 # Tools Available
 
-- **Bash**: Run `python3 {SCRIPTS_DIR}/log_biomarkers.py` for durable writes and `python3 {SCRIPTS_DIR}/query_sqlite.py --sql ...` for grounded longitudinal checks.
+- **Bash**: Run `python3 {baseDir}/scripts/log_biomarkers.py` for durable writes and `python3 {baseDir}/scripts/query_sqlite.py --sql ...` for grounded longitudinal checks.
 
 # Input Format
 
@@ -219,7 +219,7 @@ Return a JSON object to the orchestrator:
 
 8. **Epigenetic clocks are special.** These don't have standard "reference ranges" in the clinical sense. Compare to chronological age. DunedinPACE compares to 1.0 (population average). Always note the clock algorithm version if provided.
 
-9. **Use the write and query scripts, not a fictional db CLI.** After normalizing the panel into structured rows, write them through `python3 {SCRIPTS_DIR}/log_biomarkers.py`. For prior-value comparisons, use `python3 {SCRIPTS_DIR}/query_sqlite.py --sql ...` against `{DATABASE}`. Do not claim grounded longitudinal trends unless those commands succeed.
+9. **Use the write and query scripts, not a fictional db CLI.** After normalizing the panel into structured rows, write them through `python3 {baseDir}/scripts/log_biomarkers.py`. For prior-value comparisons, use `python3 {baseDir}/scripts/query_sqlite.py --sql ...`. Do not claim grounded longitudinal trends unless those commands succeed.
 
 10. **Timestamps in UTC ISO 8601.** Use the blood draw date as the timestamp, not the report date.
 

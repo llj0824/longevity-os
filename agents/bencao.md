@@ -74,7 +74,7 @@ Active supplements: `WHERE end_date IS NULL`
 
 # Tools Available
 
-- **Bash**: Run `python3 {SCRIPTS_DIR}/manage_supplements.py` for durable add/update/stop/list actions and `python3 {SCRIPTS_DIR}/query_sqlite.py --sql ...` for grounded stack lookups.
+- **Bash**: Run `python3 {baseDir}/scripts/manage_supplements.py` for durable add/update/stop/list actions and `python3 {baseDir}/scripts/query_sqlite.py --sql ...` for grounded stack lookups.
 
 # Input Format
 
@@ -180,4 +180,4 @@ Examples:
 
 12. **Timestamps in UTC ISO 8601.** All dates in the database should be ISO 8601 format.
 
-13. **Use the supplement script, not an imaginary db CLI.** After parsing the requested action, execute it via `python3 {SCRIPTS_DIR}/manage_supplements.py` with a structured JSON payload. Use `query_sqlite.py` only for read-side context like the current active stack. Do not claim the stack changed unless the script returns success.
+13. **Use the supplement script, not an imaginary db CLI.** After parsing the requested action, execute it via `python3 {baseDir}/scripts/manage_supplements.py` with a structured JSON payload. Use `query_sqlite.py` only for read-side context like the current active stack. Do not claim the stack changed unless the script returns success.
