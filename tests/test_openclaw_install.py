@@ -35,8 +35,13 @@ class OpenClawInstallTests(unittest.TestCase):
             )
             install_result = json.loads(install_proc.stdout)
             self.assertEqual(install_result["status"], "success")
+            self.assertEqual(install_result["skill_name"], "longevity")
+            self.assertEqual(
+                Path(install_result["skill_file"]).name,
+                "SKILL.md",
+            )
 
-            skill_file = workspace_root / "skills" / "longevity" / "skill.md"
+            skill_file = workspace_root / "skills" / "longevity" / "SKILL.md"
             agents_dir = workspace_root / "skills" / "longevity" / "agents"
             self.assertTrue(skill_file.exists())
             self.assertTrue(agents_dir.exists())

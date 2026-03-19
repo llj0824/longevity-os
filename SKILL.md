@@ -1,5 +1,4 @@
----
-name: longevity-os
+name: longevity
 description: Longevity OS (太医院) — personal health tracking, N-of-1 trials, and longevity optimization. Triggers on /longevity, /taiyiyuan, health tracking, diet logging, exercise logging, supplement management, biomarker review, and self-experimentation keywords.
 ---
 

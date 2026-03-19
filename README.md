@@ -375,8 +375,8 @@ Longevity OS is **natively compatible with OpenClaw**. The entire system is mark
 
 | Component | Format | OpenClaw equivalent |
 |-----------|--------|-------------------|
-| `SKILL.md` | Markdown prompt | `skill.md` orchestrator |
-| `agents/*.md` | 9 markdown agent prompts | Per-agent `skill.md` files |
+| `SKILL.md` | Markdown prompt | Installed `SKILL.md` orchestrator |
+| `agents/*.md` | 9 markdown agent prompts | Installed per-agent prompt files |
 | PubMed, bioRxiv | MCP tools | MCP skill servers on ClawHub |
 | Multi-agent dispatch | Orchestrator → sub-agents | OpenClaw multi-agent routing |
 | SQLite + Python scripts | Bash tool calls | OpenClaw tool execution |
@@ -402,9 +402,10 @@ python3 scripts/install_openclaw_skill.py --check
 What the installer does:
 
 - discovers your OpenClaw workspace from `~/.openclaw/openclaw.json`
-- renders `SKILL.md` into `skill.md` with the current checkout's absolute paths
+- renders `SKILL.md` into `SKILL.md` with the current checkout's absolute paths
 - copies and renders all agent prompts into `~/.openclaw/workspace/skills/longevity/agents/`
 - points the installed skill at the current runtime database under `LONGEVITY_OS_PROJECT_DIR` or the default `longevity-os-data` sibling
+- keeps the native OpenClaw command aligned with the product surface: `/longevity`
 
 This matters because copying the raw markdown files is not enough: the OpenClaw install needs rendered paths and the full agent set. If you switch worktrees or move the repo, rerun `python3 scripts/install_openclaw_skill.py`.
 

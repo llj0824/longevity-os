@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -18,9 +19,6 @@ if str(REPO_ROOT) not in sys.path:
 from paths import get_project_root
 
 
-SKILL_NAME = "longevity"
-
-
 def _default_workspace_root() -> Path:
     config_path = Path.home() / ".openclaw" / "openclaw.json"
     if config_path.exists():
@@ -29,6 +27,15 @@ def _default_workspace_root() -> Path:
         if workspace:
             return Path(workspace).expanduser().resolve()
     return (Path.home() / ".openclaw" / "workspace").resolve()
+
+
+def _skill_name(repo_root: Path) -> str:
+    skill_source = repo_root / "SKILL.md"
+    text = skill_source.read_text(encoding="utf-8")
+    match = re.search(r"^name:\s*(.+?)\s*$", text, re.MULTILINE)
+    if not match:
+        raise ValueError(f"Could not find skill name in {skill_source}")
+    return match.group(1).strip()
 
 
 def _placeholders(repo_root: Path, install_root: Path, project_root: Path) -> dict[str, str]:
@@ -58,7 +65,8 @@ def _required_agent_files(repo_root: Path) -> list[Path]:
 
 
 def install_skill(repo_root: Path, workspace_root: Path, project_root: Path) -> dict:
-    install_root = workspace_root / "skills" / SKILL_NAME
+    skill_name = _skill_name(repo_root)
+    install_root = workspace_root / "skills" / skill_name
     agents_root = install_root / "agents"
     install_root.mkdir(parents=True, exist_ok=True)
     agents_root.mkdir(parents=True, exist_ok=True)
@@ -67,7 +75,8 @@ def install_skill(repo_root: Path, workspace_root: Path, project_root: Path) -> 
 
     skill_source = repo_root / "SKILL.md"
     rendered_skill = _render_text(skill_source.read_text(encoding="utf-8"), placeholders)
-    (install_root / "skill.md").write_text(rendered_skill, encoding="utf-8")
+    skill_target = install_root / "SKILL.md"
+    skill_target.write_text(rendered_skill, encoding="utf-8")
 
     copied_agents = []
     for agent_source in _required_agent_files(repo_root):
@@ -78,10 +87,11 @@ def install_skill(repo_root: Path, workspace_root: Path, project_root: Path) -> 
 
     return {
         "status": "success",
+        "skill_name": skill_name,
         "repo_root": str(repo_root),
         "workspace_root": str(workspace_root),
         "install_root": str(install_root),
-        "skill_file": str(install_root / "skill.md"),
+        "skill_file": str(skill_target),
         "agents_dir": str(agents_root),
         "agents_installed": len(copied_agents),
         "project_root": str(project_root),
@@ -90,8 +100,9 @@ def install_skill(repo_root: Path, workspace_root: Path, project_root: Path) -> 
 
 
 def check_install(repo_root: Path, workspace_root: Path, project_root: Path) -> dict:
-    install_root = workspace_root / "skills" / SKILL_NAME
-    skill_file = install_root / "skill.md"
+    skill_name = _skill_name(repo_root)
+    install_root = workspace_root / "skills" / skill_name
+    skill_file = install_root / "SKILL.md"
     agents_root = install_root / "agents"
     expected_agents = _required_agent_files(repo_root)
 
@@ -105,9 +116,9 @@ def check_install(repo_root: Path, workspace_root: Path, project_root: Path) -> 
     if skill_file.exists():
         skill_text = skill_file.read_text(encoding="utf-8")
         if rendered_paths["{SCRIPTS_DIR}"] not in skill_text:
-            problems.append("Installed skill.md does not reference the current repo scripts directory")
+            problems.append("Installed SKILL.md does not reference the current repo scripts directory")
         if "{SCRIPTS_DIR}" in skill_text:
-            problems.append("Installed skill.md still contains unresolved placeholders")
+            problems.append("Installed SKILL.md still contains unresolved placeholders")
 
     missing_agents = []
     unresolved_agents = []
@@ -127,6 +138,7 @@ def check_install(repo_root: Path, workspace_root: Path, project_root: Path) -> 
 
     return {
         "status": "ok" if not problems else "error",
+        "skill_name": skill_name,
         "workspace_root": str(workspace_root),
         "install_root": str(install_root),
         "project_root": str(project_root),
@@ -135,7 +147,7 @@ def check_install(repo_root: Path, workspace_root: Path, project_root: Path) -> 
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Install the Longevity OS skill into OpenClaw")
+    parser = argparse.ArgumentParser(description="Install the Longevity skill into OpenClaw")
     parser.add_argument("--workspace", help="OpenClaw workspace root; defaults from ~/.openclaw/openclaw.json")
     parser.add_argument("--project-dir", help="Runtime project dir to embed in rendered files")
     parser.add_argument("--repo-root", help="Repo root to render from; defaults to this checkout")
@@ -149,7 +161,7 @@ def main() -> int:
 
     try:
         if args.clean:
-            install_root = workspace_root / "skills" / SKILL_NAME
+            install_root = workspace_root / "skills" / _skill_name(repo_root)
             if install_root.exists():
                 shutil.rmtree(install_root)
 
