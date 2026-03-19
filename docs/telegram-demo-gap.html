@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Telegram Demo Gap</title>
+    <style>
+      :root {
+        --bg: #f4efe7;
+        --paper: rgba(255, 251, 245, 0.82);
+        --ink: #1d1a17;
+        --muted: #655c53;
+        --line: rgba(29, 26, 23, 0.12);
+        --good: #2f7d63;
+        --warn: #b97422;
+        --bad: #b0463c;
+        --accent: #0f5c87;
+        --shadow: 0 18px 50px rgba(56, 36, 19, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Georgia, "Times New Roman", serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top left, rgba(15, 92, 135, 0.09), transparent 28%),
+          radial-gradient(circle at bottom right, rgba(176, 70, 60, 0.08), transparent 24%),
+          linear-gradient(180deg, #efe7dc 0%, var(--bg) 100%);
+      }
+
+      .frame {
+        width: min(1120px, calc(100% - 32px));
+        margin: 24px auto 48px;
+      }
+
+      .hero,
+      .panel,
+      .card,
+      .flow-box {
+        backdrop-filter: blur(8px);
+        background: var(--paper);
+        border: 1px solid var(--line);
+        box-shadow: var(--shadow);
+      }
+
+      .hero {
+        border-radius: 28px;
+        padding: 28px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .hero:before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(115deg, rgba(15, 92, 135, 0.08), transparent 40%),
+          linear-gradient(300deg, rgba(176, 70, 60, 0.07), transparent 35%);
+        pointer-events: none;
+      }
+
+      .eyebrow {
+        margin: 0 0 12px;
+        font-size: 12px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin: 0;
+        font-weight: 600;
+      }
+
+      h1 {
+        font-size: clamp(34px, 6vw, 62px);
+        line-height: 0.95;
+        max-width: 9ch;
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: 1.3fr 0.9fr;
+        gap: 24px;
+        align-items: end;
+        position: relative;
+        z-index: 1;
+      }
+
+      .hero p {
+        font-size: 18px;
+        line-height: 1.6;
+        color: var(--muted);
+        max-width: 48rem;
+      }
+
+      .hero-stats {
+        display: grid;
+        gap: 12px;
+      }
+
+      .stat {
+        border-top: 1px solid var(--line);
+        padding-top: 12px;
+      }
+
+      .stat strong {
+        display: block;
+        font-size: 28px;
+        margin-bottom: 4px;
+      }
+
+      .grid {
+        display: grid;
+        gap: 18px;
+        margin-top: 18px;
+      }
+
+      .two {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .panel {
+        border-radius: 24px;
+        padding: 22px;
+      }
+
+      .panel h2 {
+        font-size: 24px;
+        margin-bottom: 14px;
+      }
+
+      .panel p,
+      .panel li {
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+      }
+
+      .current {
+        background: rgba(176, 70, 60, 0.09);
+        color: var(--bad);
+      }
+
+      .target {
+        background: rgba(47, 125, 99, 0.1);
+        color: var(--good);
+      }
+
+      .flow {
+        display: grid;
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      .flow-box {
+        border-radius: 18px;
+        padding: 16px;
+        position: relative;
+      }
+
+      .flow-box + .flow-box:before {
+        content: "↓";
+        position: absolute;
+        top: -18px;
+        left: 18px;
+        color: var(--accent);
+        font-size: 18px;
+      }
+
+      .flow-box h3 {
+        font-size: 16px;
+        margin-bottom: 6px;
+      }
+
+      .flow-box p {
+        margin: 0;
+        font-size: 14px;
+      }
+
+      .gap-strip {
+        display: grid;
+        gap: 14px;
+      }
+
+      .card {
+        border-radius: 20px;
+        padding: 18px;
+      }
+
+      .card h3 {
+        font-size: 18px;
+        margin-bottom: 8px;
+      }
+
+      .card p {
+        margin: 0;
+        font-size: 15px;
+      }
+
+      .ranked {
+        counter-reset: item;
+        display: grid;
+        gap: 14px;
+      }
+
+      .ranked li {
+        list-style: none;
+        padding: 16px 18px 16px 64px;
+        position: relative;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.42);
+      }
+
+      .ranked li:before {
+        counter-increment: item;
+        content: counter(item);
+        position: absolute;
+        left: 18px;
+        top: 16px;
+        width: 30px;
+        height: 30px;
+        border-radius: 999px;
+        display: grid;
+        place-items: center;
+        background: var(--ink);
+        color: #fffaf3;
+        font-size: 13px;
+      }
+
+      .ranked strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .footer-note {
+        margin-top: 18px;
+        font-size: 14px;
+        color: var(--muted);
+      }
+
+      @media (max-width: 840px) {
+        .hero-grid,
+        .two {
+          grid-template-columns: 1fr;
+        }
+
+        h1 {
+          max-width: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="frame">
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <p class="eyebrow">Telegram Demo Diagnosis</p>
+            <h1>The bot sounds right, but it does not yet behave like the product.</h1>
+            <p>
+              The gap is not missing demo data. The gap is that Telegram messages are still hitting a
+              longevity-flavored reply layer more reliably than they are hitting the real
+              logging-reporting-trial workflow behind the product story.
+            </p>
+          </div>
+          <div class="hero-stats">
+            <div class="stat">
+              <strong>349</strong>
+              <span>diet entries already in the database</span>
+            </div>
+            <div class="stat">
+              <strong>571</strong>
+              <span>body-metric rows already available</span>
+            </div>
+            <div class="stat">
+              <strong>2</strong>
+              <span>real trials already stored, including an active creatine trial</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid two">
+        <article class="panel">
+          <div class="status current">Current State</div>
+          <h2>What is happening now</h2>
+          <div class="flow">
+            <div class="flow-box">
+              <h3>Telegram message arrives</h3>
+              <p>The transport path is mostly working. The bot receives messages and replies.</p>
+            </div>
+            <div class="flow-box">
+              <h3>Skill tone activates</h3>
+              <p>The bot often answers in a longevity voice after <code>/longevity</code>.</p>
+            </div>
+            <div class="flow-box">
+              <h3>Structured app behavior is inconsistent</h3>
+              <p>Meal logging, report generation, and trial flows do not consistently hit the real database-backed workflow.</p>
+            </div>
+            <div class="flow-box">
+              <h3>User sees plausible prose</h3>
+              <p>The reply feels intelligent, but it often looks more like coaching text than a real application output.</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="status target">Target State</div>
+          <h2>What the product needs to do</h2>
+          <div class="flow">
+            <div class="flow-box">
+              <h3>Telegram message arrives</h3>
+              <p>Input is parsed into a concrete domain intent like meal log, metric log, report, insight, or trial request.</p>
+            </div>
+            <div class="flow-box">
+              <h3>Workflow executes</h3>
+              <p>The runtime performs structured reads and writes against SQLite and dispatches multi-agent logic where needed.</p>
+            </div>
+            <div class="flow-box">
+              <h3>DB-backed result is produced</h3>
+              <p>The response includes real logged rows, real trend numbers, real insights, and real trial state.</p>
+            </div>
+            <div class="flow-box">
+              <h3>Telegram output demos cleanly</h3>
+              <p>The message is concise, visual, and trustworthy enough to record in a single pass.</p>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="grid two">
+        <article class="panel">
+          <h2>What I think is going on</h2>
+          <div class="gap-strip">
+            <div class="card">
+              <h3>1. Data is not the problem</h3>
+              <p>
+                The database already contains meaningful diet, metrics, insight, and trial data. The wow-demo facts
+                are already there.
+              </p>
+            </div>
+            <div class="card">
+              <h3>2. Prompt richness is not the problem</h3>
+              <p>
+                The longevity skill prompt clearly describes a structured medical-academy style system with database
+                writes, queries, and trial orchestration.
+              </p>
+            </div>
+            <div class="card">
+              <h3>3. Integration discipline is the problem</h3>
+              <p>
+                The runtime is still too willing to answer with plausible prose when it should be forced through
+                concrete intent dispatch, DB reads, DB writes, and explicit trial pipeline steps.
+              </p>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel">
+          <h2>Current vs Target Gap</h2>
+          <div class="gap-strip">
+            <div class="card">
+              <h3>Current</h3>
+              <p>“I look like a longevity assistant.”</p>
+            </div>
+            <div class="card">
+              <h3>Target</h3>
+              <p>“I am a real application layer over a longevity database and trial engine.”</p>
+            </div>
+            <div class="card">
+              <h3>Demo risk</h3>
+              <p>
+                If we record before closing this gap, the video will overclaim product behavior and underdeliver on
+                the most important scenes.
+              </p>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="panel" style="margin-top: 18px;">
+        <h2>Ranked Fix Order</h2>
+        <ol class="ranked">
+          <li>
+            <strong>Make skill loading deterministic.</strong>
+            Until the longevity skill is discovered reliably, every other fix sits on shaky ground.
+          </li>
+          <li>
+            <strong>Force Telegram into the real longevity workflow.</strong>
+            The bot needs to do more than change tone after <code>/longevity</code>.
+          </li>
+          <li>
+            <strong>Get meal logging and metric logging writing to SQLite.</strong>
+            This turns the first half of the demo from theater into evidence.
+          </li>
+          <li>
+            <strong>Make reports and insight answers read real stored data.</strong>
+            This is where the product becomes obviously different from a generic chatbot.
+          </li>
+          <li>
+            <strong>Wire the trial design and trial status scenes end to end.</strong>
+            This is the differentiator and needs to be genuinely live.
+          </li>
+          <li>
+            <strong>Tighten Telegram formatting and rehearsal flow.</strong>
+            Polish only matters after the outputs are truly correct.
+          </li>
+        </ol>
+        <p class="footer-note">
+          Short version: the bot already has the voice and the data. What it still lacks is strict workflow execution.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

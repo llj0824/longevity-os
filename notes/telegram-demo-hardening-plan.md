@@ -21,24 +21,65 @@ Make the Telegram bot demo credible end to end:
   - active Creatine-Cognition Trial
 - Skill loading had a path issue when the skill resolved outside the workspace root.
 
-## Task List
+## Ranked Task List
 
-- [ ] Fix skill loading so the Telegram runtime consistently discovers and uses the local `longevity` skill without path warnings.
-- [ ] Trace Telegram message handling and confirm `/longevity` enters the intended longevity workflow rather than only changing tone.
-- [ ] Implement diet logging dispatch so meal messages create `diet_entries` rows with timestamp, meal type, description, and macro estimates.
-- [ ] Implement breakfast/lunch/dinner inference rules for casual meal messages when explicit meal type is missing.
-- [ ] Implement multi-input body-metric parsing so messages like `Weight 72.3kg this morning, slept 7.5 hours, resting HR 57` write separate `body_metrics` rows.
-- [ ] Add idempotent regression checks for meal logging and multi-metric logging.
-- [ ] Make `Weekly report` query the real database and synthesize diet, exercise, sleep, biomarkers, and active-trial state instead of producing generic advice.
-- [ ] Include concrete trend numbers in reports when data exists.
-- [ ] Add literature citation formatting that is concise and demo-friendly.
-- [ ] Make the protein-sleep question pull the existing `insights` record and present the stored effect size / p-value cleanly.
-- [ ] Ensure the experiment-design prompt triggers the intended trial pipeline across `shixiao`, `yuanpan`, and `yizheng`.
-- [ ] Ensure `How's my creatine trial going?` reads the real active trial and summarizes status, phase, and compliance.
-- [ ] Reduce Telegram response sprawl so demo messages land as crisp structured outputs rather than long essay-style replies.
-- [ ] Decide whether Telegram streaming should stay `partial` or switch to a cleaner mode for screen recording.
-- [ ] Add a deterministic demo-reset path so we can start from a clean Telegram chat and known DB state before recording.
-- [ ] Document the exact demo script that matches the implemented behavior.
+1. [ ] Fix skill loading so the Telegram runtime consistently discovers and uses the local `longevity` skill without path warnings.
+   This is the first gate. If the skill is not loaded deterministically, nothing downstream is trustworthy.
+2. [ ] Trace Telegram message handling and confirm `/longevity` enters the intended longevity workflow rather than only changing tone.
+   Right now the bot sounds like a longevity coach, but it does not yet behave like the structured longevity system.
+3. [ ] Implement diet logging dispatch so meal messages create `diet_entries` rows with timestamp, meal type, description, and macro estimates.
+   This unlocks the first two scenes of the demo and proves the bot is writing to the real database.
+4. [ ] Implement breakfast/lunch/dinner inference rules for casual meal messages when explicit meal type is missing.
+   The scripted demo depends on effortless casual inputs, not rigid command syntax.
+5. [ ] Implement multi-input body-metric parsing so messages like `Weight 72.3kg this morning, slept 7.5 hours, resting HR 57` write separate `body_metrics` rows.
+   This unlocks the body-metrics scene and proves multi-entity parsing works.
+6. [ ] Add idempotent regression checks for meal logging and multi-metric logging.
+   We need a safety net before tightening prompt behavior further.
+7. [ ] Make `Weekly report` query the real database and synthesize diet, exercise, sleep, biomarkers, and active-trial state instead of producing generic advice.
+   This is the actual "wow" moment, so it needs to be DB-backed rather than improvised.
+8. [ ] Include concrete trend numbers in reports when data exists.
+   The report should feel analytical, not hand-wavy.
+9. [ ] Add literature citation formatting that is concise and demo-friendly.
+   We want evidence-rich answers without turning the bot into a wall of text.
+10. [ ] Make the protein-sleep question pull the existing `insights` record and present the stored effect size / p-value cleanly.
+    This is the key bridge from "tracker" to "insight engine."
+11. [ ] Ensure the experiment-design prompt triggers the intended trial pipeline across `shixiao`, `yuanpan`, and `yizheng`.
+    This is the differentiator scene, so it needs to hit the actual multi-agent design flow.
+12. [ ] Ensure `How's my creatine trial going?` reads the real active trial and summarizes status, phase, and compliance.
+    The active trial already exists in the DB; the bot needs to expose it reliably.
+13. [ ] Reduce Telegram response sprawl so demo messages land as crisp structured outputs rather than long essay-style replies.
+    Even correct logic will demo poorly if the responses are too sprawling.
+14. [ ] Decide whether Telegram streaming should stay `partial` or switch to a cleaner mode for screen recording.
+    This is mostly presentation polish after behavior is correct.
+15. [ ] Add a deterministic demo-reset path so we can start from a clean Telegram chat and known DB state before recording.
+    This prevents flaky rehearsal and avoids contaminating the final take.
+16. [ ] Document the exact demo script that matches the implemented behavior.
+    The recording script should be the last thing we lock once the product behavior is real.
+
+## What I Think Is Going On
+
+The current gap looks like a workflow integration problem, not a data problem.
+
+- The data layer already exists and is populated.
+- The domain prompt is rich and clearly describes a structured logging/reporting system.
+- Telegram messages do reach the bot and produce themed replies.
+- But the replies are often prose-first and generic, which strongly suggests the runtime is not consistently invoking the full database-backed workflow for each intent.
+
+My working model is:
+
+- `Telegram transport` is mostly fine.
+- `Skill activation` is fragile and was partially broken by the out-of-root skill path.
+- `Intent -> DB action` execution is incomplete or not being enforced hard enough.
+- `Report/insight/trial` prompts are falling back to plausible coaching prose instead of being forced through concrete reads from SQLite.
+
+So the gap is not:
+
+- "we need more demo data"
+- or "the bot cannot talk in a longevity voice"
+
+The gap is:
+
+- "the bot is not yet behaving like a real application layer over the longevity database"
 
 ## Suggested Implementation Order
 
