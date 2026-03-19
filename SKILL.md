@@ -334,8 +334,9 @@ When the user requests a weekly report (or on Sunday evening automatically if pr
    c. Compares to previous week and to targets
    d. Identifies the week's top insight or pattern
    e. Generates a full report
-4. Save the report to `{REPORTS_DIR}/weekly-{YYYY}-W{NN}.md`
-5. Present a summary to the user; full report available at the file path
+4. Use `python3 {SCRIPTS_DIR}/weekly_report.py --start {YYYY-MM-DD} --end {YYYY-MM-DD}` as the grounded report surface
+5. Save the report to `{REPORTS_DIR}/weekly-{YYYY}-W{NN}.md`
+6. Present a summary to the user; full report available at the file path
 
 ---
 
@@ -498,8 +499,8 @@ This integration is lightweight — 太医院 does NOT write to the vault direct
 | "Blood work: HbA1c 5.1, LDL 95" | Dispatch yanfang → run `scripts/log_biomarkers.py` → flag any out-of-range → compare to last panel |
 | "How's my sleep?" | Dispatch zhenmai (query mode) → pull sleep metrics → Layer 1 summary |
 | "Daily summary" | Dispatch baogao → aggregate today → present digest |
-| "Weekly report" | Dispatch baogao → aggregate week → save report → present summary |
+| "Weekly report" | Dispatch baogao → run `scripts/weekly_report.py` → save report → present summary |
 | "Any patterns?" | Dispatch shixiao → run analysis → present findings |
 | "Propose a trial" | Full trial flow: shixiao → yuanpan → yizheng → user approval |
-| "Trial status" | Query active trials → show phase, compliance, preliminary results |
+| "Trial status" | Dispatch shixiao → run `scripts/trial_status.py` → show phase and compliance |
 | "Had sushi for lunch, then did 30 min yoga" | MULTI: dispatch shiyi + daoyin in parallel → unified response |

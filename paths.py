@@ -31,6 +31,10 @@ def get_data_dir() -> Path:
     return get_project_root() / "data"
 
 
+def get_reports_dir() -> Path:
+    return get_project_root() / "reports"
+
+
 def get_db_path() -> Path:
     """Return the SQLite database path.
 
@@ -49,5 +53,6 @@ def describe_runtime_paths() -> dict[str, str]:
         "repo_root": str(get_repo_root()),
         "project_root": str(get_project_root()),
         "data_dir": str(get_data_dir()),
+        "reports_dir": str(get_reports_dir()),
         "db_path": str(get_db_path()),
     }
