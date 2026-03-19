@@ -418,6 +418,8 @@ What this does:
 
 - `scripts/demo_reset.py` is the top-level operator command. It resets the database, seeds deterministic demo data, and verifies that the hero trial and insight records exist.
 - `scripts/generate_demo_data.py` is the lower-level seed primitive. By default it resets the DB and inserts a fixed 90-day story arc. With `--skip-reset`, it seeds into an already-reset database.
+- `scripts/log_meal.py` is the durable meal write surface for the diet agent. It accepts a structured JSON payload on stdin and writes one `diet_entries` row plus its `diet_ingredients`.
+- `scripts/log_metrics.py` is the durable body-metric write surface for the metrics agent. It accepts a structured JSON payload on stdin and writes one or more `body_metrics` rows in a batch.
 - `paths.py` is the runtime path source of truth for scripts and modeling code.
 
 Runtime path overrides:
@@ -437,6 +439,22 @@ This matters for demos because the failure mode is usually not “no story,” i
 - enough data density for weekly reports and cross-module insights to read like a real user history
 
 The generated dataset is opinionated on purpose: it is optimized for product walkthroughs, screenshots, and “show me the write path, now show me the read path” demos.
+
+### Durable Write Surfaces
+
+For prompt-driven ingestion, the repo now has explicit write scripts instead of relying on a fictional `data/db.py` CLI:
+
+```bash
+python3 scripts/log_meal.py <<'EOF'
+{"timestamp":"2026-03-12T12:30:00+00:00","meal_type":"lunch","description":"Salmon bowl","ingredients":[{"ingredient_name":"salmon","normalized_name":"salmon","amount_g":170,"calories":353,"protein_g":34.0,"carbs_g":0,"fat_g":22.0,"fiber_g":0}]}
+EOF
+
+python3 scripts/log_metrics.py <<'EOF'
+{"timestamp":"2026-03-12T07:00:00+00:00","entries":[{"metric_type":"weight","value":72.5,"unit":"kg","context":"morning fasted"},{"metric_type":"resting_hr","value":56,"unit":"bpm","context":"resting"}]}
+EOF
+```
+
+These scripts are the write contracts the meal and metric agents should call once they have parsed the user message into structured data.
 
 ---
 
@@ -519,8 +537,10 @@ longevity-os/
 │   ├── engine.py               # Rolling stats, trends, anomalies
 │   ├── patterns.py             # Cross-module correlation scanner
 │   └── causal.py               # ITS, Bayesian STS, power analysis
-├── scripts/                    # Setup, backup, import, export
+├── scripts/                    # Setup, backup, import, export, durable writes
 │   ├── demo_reset.py           # Reset, seed, and verify demo data
+│   ├── log_meal.py             # Durable meal write surface
+│   ├── log_metrics.py          # Durable body-metric write surface
 └── docs/
     ├── architecture-current-state.html  # Deep-dive review artifact
     ├── architecture.svg        # System architecture diagram
