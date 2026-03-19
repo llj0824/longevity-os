@@ -14,14 +14,14 @@ Think of yourself as a chief medical officer for a single patient: Albert. You t
 ## System Paths
 
 ```
-SKILL_DIR     = /Users/A.Y/programs/ai-skills/longevity-os
+SKILL_DIR     = directory containing this file
 AGENTS_DIR    = {SKILL_DIR}/agents/
 MODELING_DIR  = {SKILL_DIR}/modeling/
 DATA_DIR      = {SKILL_DIR}/data/
 SCRIPTS_DIR   = {SKILL_DIR}/scripts/
 
-PROJECT_DIR   = /Users/A.Y/Desktop/Projects/2026/longevity-os
-DATABASE      = {PROJECT_DIR}/data/taiyiyuan.db
+PROJECT_DIR   = LONGEVITY_OS_PROJECT_DIR if set, else sibling directory named longevity-os-data next to {SKILL_DIR}
+DATABASE      = LONGEVITY_OS_DB_PATH if set, else {PROJECT_DIR}/data/taiyiyuan.db
 REPORTS_DIR   = {PROJECT_DIR}/reports/
 PHOTOS_DIR    = {PROJECT_DIR}/photos/
 TRIALS_DIR    = {PROJECT_DIR}/trials/
@@ -37,10 +37,9 @@ On first invocation (or if the database file is missing):
 
 1. Check if `{DATABASE}` exists: `ls {DATABASE}`
 2. If it does NOT exist:
-   a. Create the data directory: `mkdir -p {PROJECT_DIR}/data`
-   b. Initialize the database from schema: `sqlite3 {DATABASE} < {SCHEMA_FILE}`
-   c. Insert initial schema version: `sqlite3 {DATABASE} "INSERT INTO schema_version VALUES (1, datetime('now'));"`
-   d. Inform the user: "Initialized 太医院 database at `{DATABASE}`."
+   a. Initialize via the setup script: `python3 {SCRIPTS_DIR}/setup.py`
+   b. Treat `scripts/setup.py` as the source of truth for directory creation, schema setup, and file permissions.
+   c. Inform the user: "Initialized 太医院 database at `{DATABASE}`."
 3. If it exists, proceed normally.
 
 ---
@@ -417,7 +416,7 @@ VALUES ({entry_id}, '{name}', '{normalized}', {amount}, {cal}, {pro}, {carb}, {f
 -- Weekly protein average
 SELECT AVG(total_protein_g) as avg_protein, COUNT(*) as meals
 FROM diet_entries
-WHERE timestamp >= date('now', '-7 days');
+WHERE substr(timestamp, 1, 10) >= date('now', '-7 days');
 
 -- Active supplements
 SELECT compound_name, dosage, dosage_unit, frequency, timing, start_date
@@ -434,9 +433,9 @@ WHERE t.status = 'active'
 GROUP BY t.id;
 
 -- Metric trend (last 30 days)
-SELECT date(timestamp) as day, AVG(value) as avg_value
+SELECT substr(timestamp, 1, 10) as day, AVG(value) as avg_value
 FROM body_metrics
-WHERE metric_type = '{metric}' AND timestamp >= date('now', '-30 days')
+WHERE metric_type = '{metric}' AND substr(timestamp, 1, 10) >= date('now', '-30 days')
 GROUP BY day
 ORDER BY day;
 ```
