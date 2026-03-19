@@ -13,7 +13,7 @@ and proposes rigorous self-experiments, then analyzes the results.<br/>
 </p>
 
 <p align="center">
-  <a href="#why-this-exists">Why</a> · <a href="#how-it-works">How It Works</a> · <a href="#conversation-examples">Examples</a> · <a href="#openclaw-compatibility">OpenClaw</a> · <a href="#dashboard">Dashboard</a> · <a href="#quick-start">Quick Start</a> · <a href="README.zh.md">中文文档</a>
+  <a href="#why-this-exists">Why</a> · <a href="#how-it-works">How It Works</a> · <a href="#conversation-examples">Examples</a> · <a href="#openclaw-compatibility">OpenClaw</a> · <a href="#demo-workflow">Demo Workflow</a> · <a href="#quick-start">Quick Start</a> · <a href="#architecture-docs">Architecture</a> · <a href="README.zh.md">中文文档</a>
 </p>
 
 <p align="center">
@@ -89,6 +89,8 @@ Longevity OS is built as a **multi-agent skill**: 10 markdown agent prompts + MC
 <p align="center">
   <img src="docs/agent-flow.svg" alt="Agent Dispatch Flow" width="100%" />
 </p>
+
+For the current architecture, ownership boundaries, read and write sequences, and schema notes, see [`docs/architecture-current-state.md`](docs/architecture-current-state.md).
 
 ---
 
@@ -386,7 +388,7 @@ Longevity OS is **natively compatible with OpenClaw**. The entire system is mark
 git clone https://github.com/albert-ying/longevity-os.git
 
 # 2. Initialize the database
-cd longevity-os && python scripts/setup.py
+cd longevity-os && python3 scripts/setup.py
 
 # 3. Copy agent prompts to your OpenClaw workspace
 cp SKILL.md ~/.openclaw/skills/longevity/skill.md
@@ -403,17 +405,52 @@ The orchestrator (Imperial Physician) pattern maps directly to OpenClaw's [multi
 
 ---
 
+## Demo Workflow
+
+If you want a repeatable product demo instead of an ad hoc local setup, use the explicit demo reset workflow:
+
+```bash
+python3 scripts/demo_reset.py
+python3 dashboard/server.py
+```
+
+What this does:
+
+- `scripts/demo_reset.py` is the top-level operator command. It resets the database, seeds deterministic demo data, and verifies that the hero trial and insight records exist.
+- `scripts/generate_demo_data.py` is the lower-level seed primitive. By default it resets the DB and inserts a fixed 90-day story arc. With `--skip-reset`, it seeds into an already-reset database.
+- `paths.py` is the runtime path source of truth for scripts and modeling code.
+
+Runtime path overrides:
+
+- `LONGEVITY_OS_PROJECT_DIR` changes where mutable runtime data lives. By default it uses a sibling directory named `longevity-os-data`.
+- `LONGEVITY_OS_DB_PATH` overrides the SQLite file directly.
+
+This matters for demos because the failure mode is usually not “no story,” it is “the story looked plausible but the app was reading the wrong database or the wrong date bucket.” The demo reset flow is meant to fail loudly instead.
+
+### What The Seed Command Is Actually Doing
+
+`scripts/generate_demo_data.py` does not just append a few rows. It creates a deterministic, full-stack demo state:
+
+- 90 days of diet, exercise, body metrics, biomarkers, supplements, insights, model cache rows, and two trials
+- a completed protein-sleep trial
+- an active creatine-cognition trial
+- enough data density for weekly reports and cross-module insights to read like a real user history
+
+The generated dataset is opinionated on purpose: it is optimized for product walkthroughs, screenshots, and “show me the write path, now show me the read path” demos.
+
+---
+
 ## Quick Start
 
 ### Claude Code
 
 ```bash
-# 1. Initialize the database
-cd ~/Desktop/Projects/2026/longevity-os
-python scripts/setup.py
+# 1. Reset and seed the demo database
+cd longevity-os
+python3 scripts/demo_reset.py
 
 # 2. Start the dashboard server
-python dashboard/server.py
+python3 dashboard/server.py
 
 # 3. Open http://localhost:8420
 ```
@@ -438,6 +475,16 @@ After copying skills to your OpenClaw workspace (see [OpenClaw setup](#setup-on-
 
 ---
 
+## Architecture Docs
+
+The repo now includes a current-state architecture note for keyholders:
+
+- [`docs/architecture-current-state.md`](docs/architecture-current-state.md) covers the system overview, subsystem ownership, read/write sequences, state machines, data flow, DB schema slices, handoff boundaries, design decisions, and known ambiguities.
+
+If you are evaluating this as a Compound Life AI product rather than a code sample, start there after this README.
+
+---
+
 ## Modules
 
 | Module | Agent | Capabilities |
@@ -458,6 +505,7 @@ After copying skills to your OpenClaw workspace (see [OpenClaw setup](#setup-on-
 
 ```
 longevity-os/
+├── paths.py                    # Runtime path resolution for repo and data dirs
 ├── SKILL.md                    # Orchestrator (main entry point)
 ├── agents/                     # 9 department agent prompts
 ├── dashboard/
@@ -472,7 +520,9 @@ longevity-os/
 │   ├── patterns.py             # Cross-module correlation scanner
 │   └── causal.py               # ITS, Bayesian STS, power analysis
 ├── scripts/                    # Setup, backup, import, export
+│   ├── demo_reset.py           # Reset, seed, and verify demo data
 └── docs/
+    ├── architecture-current-state.md  # Current ownership and boundary docs
     ├── architecture.svg        # System architecture diagram
     ├── agent-flow.svg          # Agent dispatch flow
     ├── characters/             # 10 agent character illustrations
