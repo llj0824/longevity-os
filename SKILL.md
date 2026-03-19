@@ -396,7 +396,16 @@ For Chinese dishes (红烧肉, 宫保鸡丁, etc.):
 
 ## SQL Patterns
 
-Agents interact with the database via `sqlite3 {DATABASE}` commands. Common patterns:
+Agents should prefer dedicated runtime scripts for writes and the read-only query helper for ad hoc inspection:
+
+- `python3 {SCRIPTS_DIR}/log_meal.py`
+- `python3 {SCRIPTS_DIR}/log_metrics.py`
+- `python3 {SCRIPTS_DIR}/log_exercise.py`
+- `python3 {SCRIPTS_DIR}/log_biomarkers.py`
+- `python3 {SCRIPTS_DIR}/manage_supplements.py`
+- `python3 {SCRIPTS_DIR}/query_sqlite.py --sql ...`
+
+Use raw SQL only inside the payload passed to `query_sqlite.py`, not by pretending there is a hidden database shell.
 
 ### Logging
 
@@ -484,9 +493,9 @@ This integration is lightweight — 太医院 does NOT write to the vault direct
 |-----------|--------|
 | "Logged oatmeal for breakfast" | Dispatch shiyi → run `scripts/log_meal.py` → confirm with macros |
 | "72.1 kg this morning" | Dispatch zhenmai → run `scripts/log_metrics.py` → show 7-day trend |
-| "Ran 5K in 28 minutes" | Dispatch daoyin → log exercise_entry → confirm with pace |
-| "Started creatine 5g daily" | Dispatch bencao → insert supplement → check interactions → confirm |
-| "Blood work: HbA1c 5.1, LDL 95" | Dispatch yanfang → log biomarkers → flag any out-of-range → compare to last panel |
+| "Ran 5K in 28 minutes" | Dispatch daoyin → run `scripts/log_exercise.py` → confirm with pace |
+| "Started creatine 5g daily" | Dispatch bencao → run `scripts/manage_supplements.py` → check interactions → confirm |
+| "Blood work: HbA1c 5.1, LDL 95" | Dispatch yanfang → run `scripts/log_biomarkers.py` → flag any out-of-range → compare to last panel |
 | "How's my sleep?" | Dispatch zhenmai (query mode) → pull sleep metrics → Layer 1 summary |
 | "Daily summary" | Dispatch baogao → aggregate today → present digest |
 | "Weekly report" | Dispatch baogao → aggregate week → save report → present summary |

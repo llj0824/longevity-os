@@ -420,6 +420,10 @@ What this does:
 - `scripts/generate_demo_data.py` is the lower-level seed primitive. By default it resets the DB and inserts a fixed 90-day story arc. With `--skip-reset`, it seeds into an already-reset database.
 - `scripts/log_meal.py` is the durable meal write surface for the diet agent. It accepts a structured JSON payload on stdin and writes one `diet_entries` row plus its `diet_ingredients`.
 - `scripts/log_metrics.py` is the durable body-metric write surface for the metrics agent. It accepts a structured JSON payload on stdin and writes one or more `body_metrics` rows in a batch.
+- `scripts/log_exercise.py` is the durable exercise write surface for the movement agent. It accepts a structured JSON payload and writes one `exercise_entries` row plus optional `exercise_details`.
+- `scripts/log_biomarkers.py` is the durable biomarker write surface for the lab-results agent. It accepts a structured JSON payload and writes one or more `biomarkers` rows in a batch.
+- `scripts/manage_supplements.py` is the durable supplement surface for add, update, stop, and list actions.
+- `scripts/query_sqlite.py` is the read-only query helper for grounded ad hoc inspection by the trial-design and review agents.
 - `paths.py` is the runtime path source of truth for scripts and modeling code.
 
 Runtime path overrides:
@@ -454,7 +458,27 @@ python3 scripts/log_metrics.py <<'EOF'
 EOF
 ```
 
-These scripts are the write contracts the meal and metric agents should call once they have parsed the user message into structured data.
+These scripts are the write contracts the ingestion agents should call once they have parsed the user message into structured data.
+
+```bash
+python3 scripts/log_exercise.py <<'EOF'
+{"timestamp":"2026-03-12T18:00:00+00:00","activity_type":"strength","duration_minutes":55,"rpe":7,"details":[{"exercise_name":"barbell squat","sets":4,"reps":8,"weight_kg":100}]}
+EOF
+
+python3 scripts/log_biomarkers.py <<'EOF'
+{"timestamp":"2026-03-12T08:00:00+00:00","lab_source":"Quest","entries":[{"panel_name":"Lipid Panel","marker_name":"LDL","value":112,"unit":"mg/dL","reference_low":0,"reference_high":130,"optimal_low":0,"optimal_high":100}]}
+EOF
+
+python3 scripts/manage_supplements.py <<'EOF'
+{"action":"add","compound_name":"Creatine monohydrate","dosage":5,"dosage_unit":"g","frequency":"daily","timing":"morning","start_date":"2026-03-12"}
+EOF
+```
+
+For grounded ad hoc reads outside the dedicated report and trial-status scripts:
+
+```bash
+python3 scripts/query_sqlite.py --sql "SELECT compound_name, dosage, dosage_unit FROM supplements WHERE end_date IS NULL ORDER BY compound_name"
+```
 
 ---
 
