@@ -24,12 +24,18 @@ import sys
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from paths import get_db_path, get_project_root
+
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
-PROJECT_ROOT = Path("/Users/A.Y/Desktop/Projects/2026/longevity-os")
-DB_PATH = PROJECT_ROOT / "data" / "taiyiyuan.db"
-SETUP_SCRIPT = PROJECT_ROOT / "scripts" / "setup.py"
+PROJECT_ROOT = get_project_root()
+DB_PATH = get_db_path()
+SETUP_SCRIPT = REPO_ROOT / "scripts" / "setup.py"
 
 # ---------------------------------------------------------------------------
 # Deterministic seed for reproducibility

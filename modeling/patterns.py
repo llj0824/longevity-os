@@ -19,6 +19,7 @@ import json
 import argparse
 import sqlite3
 from datetime import datetime, timedelta, date
+from pathlib import Path
 from typing import Optional
 from itertools import combinations
 
@@ -29,10 +30,17 @@ from scipy import stats as scipy_stats
 # ---------------------------------------------------------------------------
 # DB import
 # ---------------------------------------------------------------------------
+REPO_ROOT = Path(__file__).resolve().parent.parent
 _DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'data')
-sys.path.insert(0, _DATA_DIR)
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+if _DATA_DIR not in sys.path:
+    sys.path.insert(0, _DATA_DIR)
 
-DB_PATH = '/Users/A.Y/Desktop/Projects/2026/longevity-os/data/taiyiyuan.db'
+from paths import get_db_path
+
+
+DB_PATH = str(get_db_path())
 
 try:
     from db import TaiYiYuanDB
