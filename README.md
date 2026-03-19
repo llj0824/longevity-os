@@ -396,7 +396,13 @@ python3 scripts/install_openclaw_skill.py
 # 4. Verify the install is complete and points at this checkout
 python3 scripts/install_openclaw_skill.py --check
 
-# 5. Enable MCP tools (PubMed, bioRxiv) via ClawHub or local config
+# 5. Restart the OpenClaw daemon so Telegram/OpenClaw pick up the new skill metadata
+openclaw daemon restart
+
+# 6. Confirm the runtime sees the skill before testing Telegram
+openclaw skills list | rg 'longevity|taiyiyuan'
+
+# 7. Enable MCP tools (PubMed, bioRxiv) via ClawHub or local config
 ```
 
 What the installer does:
@@ -407,6 +413,8 @@ What the installer does:
 - points the installed skill at the current runtime database under `LONGEVITY_OS_PROJECT_DIR` or the default `longevity-os-data` sibling
 
 This matters because copying the raw markdown files is not enough: the OpenClaw install needs rendered paths and the full agent set. If you switch worktrees or move the repo, rerun `python3 scripts/install_openclaw_skill.py`.
+
+One more runtime detail matters in practice: Telegram can keep answering from stale skill state until the OpenClaw daemon restarts. For live rehearsal, treat `openclaw daemon restart` plus `openclaw skills list | rg 'longevity|taiyiyuan'` as part of the install workflow, not an optional cleanup step.
 
 Each of the 10 agents works as an independent OpenClaw skill. You can use the full system or pick individual modules (for example just the diet tracker or just the N-of-1 trial engine).
 
@@ -454,6 +462,18 @@ This matters for demos because the failure mode is usually not “no story,” i
 - enough data density for weekly reports and cross-module insights to read like a real user history
 
 The generated dataset is opinionated on purpose: it is optimized for product walkthroughs, screenshots, and “show me the write path, now show me the read path” demos.
+
+### Live Rehearsal Note
+
+For real Telegram rehearsal:
+
+1. Run `python3 scripts/demo_reset.py`.
+2. Run `python3 scripts/install_openclaw_skill.py --check`.
+3. Run `openclaw daemon restart`.
+4. Verify `openclaw skills list | rg 'longevity|taiyiyuan'`.
+5. Send `/longevity Weekly report` manually in Telegram if the bot command menu still lags.
+
+The Telegram menu may stay stale because command-sync calls (`setMyCommands`, `deleteMyCommands`) can fail at the network layer. That does not necessarily mean the skill is broken. Typed `/longevity ...` messages can still work once the daemon has reloaded the workspace skill.
 
 ### Durable Write Surfaces
 
