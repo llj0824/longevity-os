@@ -93,6 +93,51 @@ class OpenClawInstallTests(unittest.TestCase):
             self.assertEqual(check_result["status"], "ok")
             self.assertEqual(check_result["problems"], [])
 
+    def test_installed_bundle_default_runtime_paths_work_end_to_end(self) -> None:
+        with tempfile.TemporaryDirectory() as workspace_dir:
+            workspace_root = Path(workspace_dir)
+            install_root = workspace_root / "skills" / "longevity"
+
+            subprocess.run(
+                [
+                    "python3",
+                    str(INSTALL_SCRIPT),
+                    "--workspace",
+                    str(workspace_root),
+                    "--repo-root",
+                    str(REPO_ROOT),
+                ],
+                cwd=str(REPO_ROOT),
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+
+            subprocess.run(
+                ["python3", str(install_root / "scripts" / "setup.py")],
+                cwd=str(REPO_ROOT),
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+
+            query_proc = subprocess.run(
+                [
+                    "python3",
+                    str(install_root / "scripts" / "query_sqlite.py"),
+                    "--sql",
+                    "SELECT 1 AS ok",
+                ],
+                cwd=str(REPO_ROOT),
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+            query_result = json.loads(query_proc.stdout)
+            self.assertEqual(query_result["status"], "success")
+            self.assertEqual(query_result["row_count"], 1)
+            self.assertEqual(query_result["rows"][0]["ok"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()
