@@ -85,7 +85,7 @@ Before proposing any trial:
 
 # Tools Available
 
-- **Bash**: Run `python3 {SCRIPTS_DIR}/query_sqlite.py --sql ...` for grounded database reads and modeling scripts in `{MODELING_DIR}/`.
+- **Bash**: Run `python3 {baseDir}/scripts/query_sqlite.py --sql ...` for grounded database reads and modeling scripts in `{baseDir}/modeling/`.
 - **PubMed search**: `mcp__claude_ai_PubMed__search_articles` for peer-reviewed literature
 - **bioRxiv search**: `mcp__claude_ai_bioRxiv__search_preprints` for preprints
 
@@ -207,4 +207,4 @@ Return a complete trial protocol as JSON:
 
 10. **Do not run the trial.** You design trials. The orchestrator and 试效 (Shixiao) handle activation and monitoring. Your output is a proposal that goes to 医正 (Yizheng) for independent review before activation.
 
-11. **Use the query helper for grounded reads.** When verifying baseline data, active trials, supplements, or cached insights, use `python3 {SCRIPTS_DIR}/query_sqlite.py --sql ...` against `{DATABASE}`. Do not cite grounded counts or baselines unless that query succeeds.
+11. **Use the query helper for grounded reads.** When verifying baseline data, active trials, supplements, or cached insights, use `python3 {baseDir}/scripts/query_sqlite.py --sql ...`. Do not cite grounded counts or baselines unless that query succeeds.

@@ -906,23 +906,39 @@ Longevity OS is **natively compatible with OpenClaw**. The entire system is mark
 | Multi-agent dispatch | Orchestrator → sub-agents | OpenClaw multi-agent routing |
 | SQLite + Python scripts | Bash tool calls | OpenClaw tool execution |
 
-### Setup on OpenClaw
+### Setup on OpenClaw / ClawHub
 
 ```bash
 # 1. Clone the repo
 git clone https://github.com/albert-ying/longevity-os.git
 
-# 2. Initialize the database
-cd longevity-os && python scripts/setup.py
+# 2. Install the modeling dependencies once
+cd longevity-os
+python3 -m pip install -r requirements.txt
 
-# 3. Copy agent prompts to your OpenClaw workspace
-cp SKILL.md ~/.openclaw/skills/longevity/skill.md
-cp agents/*.md ~/.openclaw/skills/longevity/agents/
+# 3. Install the portable skill bundle into your OpenClaw workspace
+python3 scripts/install_openclaw_skill.py --workspace ~/.openclaw/workspace
 
 # 4. Enable MCP tools (PubMed, bioRxiv) via ClawHub or local config
+
+# 5. Initialize the runtime database from the installed skill bundle
+python3 ~/.openclaw/workspace/skills/longevity/scripts/setup.py
+
+# Optional: use a custom runtime data root instead of the default
+LONGEVITY_OS_PROJECT_DIR=~/longevity-os-data \
+  python3 ~/.openclaw/workspace/skills/longevity/scripts/setup.py
 ```
 
 Each of the 10 agents works as an independent OpenClaw skill. You can use the full system or pick individual modules (e.g., just the diet tracker or just the N-of-1 trial engine).
+
+If you set `LONGEVITY_OS_PROJECT_DIR`, keep that same environment variable available when the installed skill runs so reads and writes stay on the same runtime database.
+
+To publish to ClawHub, publish the repository root as the skill folder. The checked-in `SKILL.md` now uses OpenClaw's `{baseDir}` convention, so the raw bundle is portable:
+
+```bash
+python3 scripts/check_clawhub_bundle.py --strict-local
+clawhub publish .
+```
 
 ### Multi-Agent on OpenClaw
 
