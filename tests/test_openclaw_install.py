@@ -138,6 +138,84 @@ class OpenClawInstallTests(unittest.TestCase):
             self.assertEqual(query_result["row_count"], 1)
             self.assertEqual(query_result["rows"][0]["ok"], 1)
 
+    def test_check_reports_stale_installed_files_and_reinstall_removes_them(self) -> None:
+        with tempfile.TemporaryDirectory() as workspace_dir:
+            workspace_root = Path(workspace_dir)
+            install_root = workspace_root / "skills" / "longevity"
+            stale_file = install_root / "scripts" / "stale_only.py"
+
+            subprocess.run(
+                [
+                    "python3",
+                    str(INSTALL_SCRIPT),
+                    "--workspace",
+                    str(workspace_root),
+                    "--repo-root",
+                    str(REPO_ROOT),
+                ],
+                cwd=str(REPO_ROOT),
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+
+            stale_file.write_text("print('stale')\n", encoding="utf-8")
+
+            check_proc = subprocess.run(
+                [
+                    "python3",
+                    str(INSTALL_SCRIPT),
+                    "--workspace",
+                    str(workspace_root),
+                    "--repo-root",
+                    str(REPO_ROOT),
+                    "--check",
+                ],
+                cwd=str(REPO_ROOT),
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(check_proc.returncode, 1)
+            check_result = json.loads(check_proc.stdout)
+            self.assertEqual(check_result["status"], "error")
+            self.assertIn("Unexpected installed files: scripts/stale_only.py", check_result["problems"])
+
+            subprocess.run(
+                [
+                    "python3",
+                    str(INSTALL_SCRIPT),
+                    "--workspace",
+                    str(workspace_root),
+                    "--repo-root",
+                    str(REPO_ROOT),
+                ],
+                cwd=str(REPO_ROOT),
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+
+            self.assertFalse(stale_file.exists())
+
+            final_check_proc = subprocess.run(
+                [
+                    "python3",
+                    str(INSTALL_SCRIPT),
+                    "--workspace",
+                    str(workspace_root),
+                    "--repo-root",
+                    str(REPO_ROOT),
+                    "--check",
+                ],
+                cwd=str(REPO_ROOT),
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+            final_check_result = json.loads(final_check_proc.stdout)
+            self.assertEqual(final_check_result["status"], "ok")
+
 
 if __name__ == "__main__":
     unittest.main()

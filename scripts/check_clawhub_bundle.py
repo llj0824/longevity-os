@@ -33,6 +33,7 @@ COMMON_LOCAL_ONLY_PATHS = (
     ".factory",
     ".kiro",
     ".windsurf",
+    "notes",
     "skills",
     "skills-lock.json",
 )

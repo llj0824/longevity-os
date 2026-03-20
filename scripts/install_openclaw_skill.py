@@ -16,6 +16,9 @@ if str(REPO_ROOT) not in sys.path:
 SKILL_NAME = "longevity"
 BUNDLE_DIRS = ("agents", "dashboard", "data", "modeling", "scripts")
 BUNDLE_FILES = ("SKILL.md", "paths.py", "requirements.txt")
+IGNORED_DIR_NAMES = {"__pycache__"}
+IGNORED_FILE_NAMES = {".DS_Store"}
+IGNORED_FILE_SUFFIXES = {".pyc", ".pyo"}
 FORBIDDEN_PLACEHOLDERS = (
     "{SKILL_DIR}",
     "{AGENTS_DIR}",
@@ -46,14 +49,36 @@ def _copy_file(src: Path, dest: Path) -> None:
     shutil.copy2(src, dest)
 
 
-def _copy_bundle(repo_root: Path, install_root: Path) -> None:
-    install_root.mkdir(parents=True, exist_ok=True)
+def _is_ignored_relative_path(relative_path: Path) -> bool:
+    if any(part in IGNORED_DIR_NAMES for part in relative_path.parts):
+        return True
+    if relative_path.name in IGNORED_FILE_NAMES:
+        return True
+    if relative_path.suffix in IGNORED_FILE_SUFFIXES:
+        return True
+    return False
+
+
+def _bundle_file_relpaths(repo_root: Path) -> list[Path]:
+    relpaths: list[Path] = [Path(relative_file) for relative_file in BUNDLE_FILES]
     for relative_dir in BUNDLE_DIRS:
         src_dir = repo_root / relative_dir
-        dest_dir = install_root / relative_dir
-        shutil.copytree(src_dir, dest_dir, dirs_exist_ok=True)
-    for relative_file in BUNDLE_FILES:
-        _copy_file(repo_root / relative_file, install_root / relative_file)
+        for src_path in sorted(src_dir.rglob("*")):
+            if not src_path.is_file():
+                continue
+            relative_path = src_path.relative_to(repo_root)
+            if _is_ignored_relative_path(relative_path):
+                continue
+            relpaths.append(relative_path)
+    return sorted(relpaths)
+
+
+def _copy_bundle(repo_root: Path, install_root: Path) -> None:
+    if install_root.exists():
+        shutil.rmtree(install_root)
+    install_root.mkdir(parents=True, exist_ok=True)
+    for relative_path in _bundle_file_relpaths(repo_root):
+        _copy_file(repo_root / relative_path, install_root / relative_path)
 
 
 def _required_agent_files(repo_root: Path) -> list[Path]:
@@ -82,6 +107,7 @@ def check_install(repo_root: Path, workspace_root: Path) -> dict:
     skill_file = install_root / "SKILL.md"
     agents_root = install_root / "agents"
     expected_agents = _required_agent_files(repo_root)
+    expected_bundle_files = {path.as_posix() for path in _bundle_file_relpaths(repo_root)}
 
     problems = []
     if not skill_file.exists():
@@ -120,6 +146,20 @@ def check_install(repo_root: Path, workspace_root: Path) -> dict:
         problems.append(f"Missing agent files: {', '.join(missing_agents)}")
     if unresolved_agents:
         problems.append(f"Unsupported placeholders remain in: {', '.join(unresolved_agents)}")
+
+    actual_bundle_files: set[str] = set()
+    if install_root.exists():
+        for installed_path in sorted(install_root.rglob("*")):
+            if not installed_path.is_file():
+                continue
+            relative_path = installed_path.relative_to(install_root)
+            if _is_ignored_relative_path(relative_path):
+                continue
+            actual_bundle_files.add(relative_path.as_posix())
+
+    unexpected_files = sorted(actual_bundle_files - expected_bundle_files)
+    if unexpected_files:
+        problems.append(f"Unexpected installed files: {', '.join(unexpected_files)}")
 
     return {
         "status": "ok" if not problems else "error",

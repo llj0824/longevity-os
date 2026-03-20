@@ -936,7 +936,7 @@ If you set `LONGEVITY_OS_PROJECT_DIR`, keep that same environment variable avail
 To publish to ClawHub, publish the repository root as the skill folder. The checked-in `SKILL.md` now uses OpenClaw's `{baseDir}` convention, so the raw bundle is portable:
 
 ```bash
-python3 scripts/check_clawhub_bundle.py
+python3 scripts/check_clawhub_bundle.py --strict-local
 clawhub publish .
 ```
 
